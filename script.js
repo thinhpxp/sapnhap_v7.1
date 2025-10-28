@@ -354,19 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 3. Gán sự kiện click cho nút đóng
                     closePopupBtn.addEventListener('click', closePopup);
 
-                    // 4. (Tùy chọn) Đóng popup khi click vào nền mờ bên ngoài
-                    popupOverlay.addEventListener('click', (event) => {
-                        if (event.target === popupOverlay) {
-                            closePopup();
-                        }
-                    });
-
-                    // 5. (Tùy chọn) Đóng popup khi nhấn phím Escape
-                    document.addEventListener('keydown', (event) => {
-                        if (event.key === 'Escape' && !popupOverlay.classList.contains('hidden')) {
-                            closePopup();
-                        }
-                    });
                 }
 
         if (modeToggle) modeToggle.addEventListener('change', toggleLookupUI);
