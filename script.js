@@ -636,9 +636,10 @@ function renderVillageChanges(villageData, title) {
 
         //Ẩn hiện khối thông tin giới thiệu và khối thông tin kết quả
         if (initialInstruction) initialInstruction.classList.add('hidden'); // Ẩn hướng dẫn
+        resultContainer.classList.remove('hidden'); // Hiện kết quả
         // Khi reset hoặc clear
         if (initialInstruction) initialInstruction.classList.remove('hidden');
-        resultContainer.classList.add('hidden');resultContainer.classList.remove('hidden'); // Hiện kết quả
+        resultContainer.classList.add('hidden');
 
         // 1. KIỂM TRA LỊCH SỬ TĨNH TRƯỚC
         const provinceData = allProvincesData.find(p => p.code == selectedProvince);
