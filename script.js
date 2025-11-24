@@ -630,7 +630,7 @@ function renderVillageChanges(villageData, title) {
             <div class="address-codes"><span class="label">Old Code:</span> ${oldCodes}</div>`;
         oldAddressDisplay.innerHTML = oldAddressHtml;
         newAddressDisplay.innerHTML = `<p>${t('lookingUp')}</p>`;
-        / --- Ẩn hướng dẫn ban đầu đi ---
+        // --- Ẩn hướng dẫn ban đầu đi ---
         if (initialInstruction) initialInstruction.classList.add('hidden');
         resultContainer.classList.remove('hidden');
         if (adminCenterActions) adminCenterActions.classList.add('hidden');
