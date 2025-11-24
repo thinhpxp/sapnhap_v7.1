@@ -220,11 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /*
-        *   setTimeout(() => {
-        *   loadInitialData();
-        *   }, 50000);
-        */
     }
 
     //QUẢN LÝ CHUYỂN ĐỔI GIAO DIỆN TRA CỨU TRUYỀN THỐNG VÀ QUICK SEARCH
