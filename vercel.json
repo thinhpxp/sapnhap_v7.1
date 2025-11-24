@@ -28,11 +28,5 @@
       "source": "/",
       "destination": "/vi.html"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/feedback",
-      "schedule": "0 10 * * 6"
-    }
   ]
 }
