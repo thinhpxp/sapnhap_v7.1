@@ -113,11 +113,8 @@ body.modal-open {
 /* --- 2. Style cho Trạng thái chờ (MỚI) --- */
 .instruction-box {
     background-color: #ffffff;
-    #border: 2px dashed #a3b2c0;
     border-radius: 12px;
-    padding: 15px;
-    #text-align: center;
-    #margin-top: 15px;
+    padding: 5px 15px;
     color: #1e76c4;
 }
 @keyframes bounce {
@@ -138,7 +135,6 @@ h1 {
 p {
 	text-align: center;
 	color: #1e76c4;
-	#margin-bottom: 15px;
 	font-size: 1em;
 	line-height: 1.5;
 }
@@ -985,11 +981,11 @@ body.modal-open {
 .social-icons {
 	margin-bottom: 5px;
 	text-align: center;
-	padding-bottom: 15px;
+	padding-bottom: 10px;
 }
 
 .social-icons a {
-	margin: 0 10px;
+	margin: 0 3px;
 	font-size: 0.8em;
 	color: #252424;
 	text-decoration: none;
