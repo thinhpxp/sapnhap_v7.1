@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(displayRealtimeLocations, 75000);
         setTimeout(() => {
             loadInitialData();
-        }, 5000);
+        }, 50000);
     }
 
     //QUẢN LÝ CHUYỂN ĐỔI GIAO DIỆN TRA CỨU TRUYỀN THỐNG VÀ QUICK SEARCH
