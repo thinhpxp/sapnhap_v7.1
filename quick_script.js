@@ -126,7 +126,10 @@
         // Ẩn danh sách kết quả
         oldResultsContainer.classList.add('hidden');
         newResultsContainer.classList.add('hidden');
-
+        // --- THÊM MỚI: Ẩn hướng dẫn ban đầu đi ---
+        // Lưu ý: Cần đảm bảo biến 'initialInstruction' đã được khai báo hoặc lấy lại từ DOM
+        const instructionBox = document.getElementById('initial-instruction');
+        if (instructionBox) instructionBox.classList.add('hidden');
         // Hiển thị loading trong khung kết quả chính
         resultContainer.classList.remove('hidden');
         oldAddressDisplay.innerHTML = '';
