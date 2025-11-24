@@ -367,6 +367,7 @@ button#lookup-btn:disabled {
 
 /* --- PHẦN STYLE CỦA VÙNG TRẢ KẾT QUẢ --- */
 #result-container {
+    background-color: white;
 	margin-top: 15px;
 	padding: 25px;
 	border-radius: 12px;

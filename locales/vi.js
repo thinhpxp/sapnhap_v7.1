@@ -81,7 +81,7 @@ window.translations = {
   "agency_cong_an_xa": "Công an xã",
 
    // ...
-  "feedbackDescription": "Mọi góp ý, bổ sung xin hãy nhắn tin thật chi tiết cho mình nhé. Ví dụ: Trung tâm 1 cửa mới của phường X nay ở địa chỉ Y. Vào tháng 10/2024, Ủy ban Thường vụ Quốc hội ban hành nghị quyết về sắp xếp đvhc cấp xã đối với hàng loạt tỉnh thành, tương tự như một đợt sáp nhập quy mô nhỏ trước thời điểm 1/7/25, vì thế một số xã/phường cũ không có mặt trong dữ liệu, nếu muốn bổ sung bạn có thể nhắn tin cụ thể cho mình. Các bạn Việt Nam ở Campuchia cần giúp đỡ cũng có thể nhắn tin ở đây!",
+  "feedbackDescription": "Mọi góp ý, bổ sung xin hãy nhắn tin thật chi tiết cho mình nhé.",
   "feedbackPlaceholder": "Nhập góp ý của bạn...",
   "feedbackSendBtn": "Gửi",
   "feedbackSuccess": "Cám ơn, các phản hồi sẽ được mình xử lý vào mỗi cuối tuần",
