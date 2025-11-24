@@ -62,21 +62,22 @@ body.modal-open {
 	display: flex;
 	gap: 30px;
 	width: 100%;
-	max-width: 80%;
+	max-width: 100%;
 	margin: 0 auto;
+	align-items: flex-start; /* Căn đỉnh trên */
 }
 
 .left-column {
-	flex: 2;
-	min-width: 350px;
+	flex: 0 0 35%;
+	min-width: 320px;
 	background: var(--surface-color);
-	padding: 30px;
+	padding: 15px;
 	border-radius: 12px;
 	border: 1px solid var(--border-color);
 }
 
 .left-column-content-wrapper {
-	max-width: 80%;
+	max-width: 100%;
 	margin: 0 auto;
 }
 
@@ -91,7 +92,7 @@ body.modal-open {
 /*----------CỘT BÊN PHẢI VÀ CÁC PHẦN TỪ CON BÊN TRONG---------*/
 .right-column {
 	flex: 1;
-	padding-top: 20px;
+	padding-top: 0px;
 }
 
 .right-column h2 {
@@ -99,15 +100,25 @@ body.modal-open {
 }
 
 .right-column .right-text {
-	color: white;
+	color: #212529;
 	text-align: left;
 	font-size: 0.9em;
-	margin-bottom: 4px;
+	#margin-bottom: 4px;
 }
 
 .right-column .right-title {
-	color: white;
+	color: #212529;
 	text-align: left;
+}
+/* --- 2. Style cho Trạng thái chờ (MỚI) --- */
+.instruction-box {
+    background-color: #ffffff;
+    #border: 2px dashed #a3b2c0;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    #margin-top: 15px;
+    color: #1e76c4;
 }
 
 /********************************************************************************/
@@ -369,9 +380,7 @@ button#lookup-btn:disabled {
 	border-bottom: 1px solid var(--border-color);
 }
 
-
 /* --- PHẦN STYLE MỚI VÀ ĐƯỢC CẬP NHẬT --- */
-
 .address-line {
 	display: flex;
 	justify-content: space-between;
@@ -460,6 +469,15 @@ button#lookup-btn:disabled {
 }
 
 /* === CSS MỚI CHO LAYOUT 2 CỘT QR === */
+/* --- 3. Style cho Khu vực Đáy (MỚI) --- */
+.bottom-info-section {
+    max-width: 100%;
+    margin: 10px auto 0;
+    background: var(--surface-color);
+    #border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+}
 .image-container-grid {
 	display: flex;
 	/* Kích hoạt Flexbox */
@@ -471,21 +489,11 @@ button#lookup-btn:disabled {
 	margin: 5px auto;
 }
 
-.intro {}
-
-.qr-column {
-	flex: 1;
-	/* Giúp 2 cột có chiều rộng bằng nhau */
+.qr-container-full {
 	display: flex;
-	flex-direction: column;
-	/* Sắp xếp ảnh và chữ theo chiều dọc */
-	align-items: center;
-	/* Căn giữa nội dung trong cột */
-	background-color: var(--surface-color);
-	padding: 10px;
-	border-radius: 8px;
-	border: 1px solid var(--border-color);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .qr-column img {
@@ -502,11 +510,13 @@ button#lookup-btn:disabled {
 /* CSS cho phần hỗ trợ Buy me a Coffee */
 
 /* Bao quanh ảnh để dễ dàng căn chỉnh */
-.qr-column .coffee-image-wrapper {
-	text-align: center;
-	/* Căn giữa ảnh trong cột */
-	margin-top: 5px;
-	/* Khoảng cách phía trên ảnh */
+.coffee-image-wrapper {
+	display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 15px 0;
 }
 
 /* Định dạng cho ảnh */
@@ -527,21 +537,9 @@ button#lookup-btn:disabled {
 }
 
 /* Định dạng ảnh bank qr ở giao diện tiếng Việt */
-.qr-column .bank-qrcode {
-	max-width: 100%;
-	/* Đảm bảo ảnh không bị tràn ra ngoài cột */
-	width: 95%;
-	height: auto;
-	/* Giữ tỉ lệ khung hình của ảnh */
-	aspect-ratio: 1576 / 721;
-	object-fit: contain;
-	/* Đảm bảo toàn bộ ảnh được hiển thị, không bị cắt xén */
-	display: inline-block;
-	/* Giúp text-align center hoạt động tốt */
-	border-radius: 8px;
-	/* Bo tròn nhẹ góc ảnh (tùy chọn) */
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	/* Thêm đổ bóng nhẹ cho ảnh (tùy chọn) */
+.bank-qrcode, .coffee-support-image {
+    max-height: 150px; /* Giới hạn chiều cao để không quá to */
+    width: auto;
 }
 
 /* Định dạng cho chú thích ảnh */
@@ -1014,16 +1012,11 @@ body.modal-open {
 
 	.left-column,
 	.right-column {
-		padding: 20px;
+		#padding: 20px;
 	}
 
 	.left-column-content-wrapper {
 		max-width: 100%;
-	}
-
-	.right-column {
-		border-radius: 12px;
-		border: 1px solid var(--border-color);
 	}
 
 	h1 {
