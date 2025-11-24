@@ -476,7 +476,7 @@ button#lookup-btn:disabled {
     background: var(--surface-color);
     #border-radius: 12px;
     border: 1px solid var(--border-color);
-    padding: 20px;
+    padding: 10px 0px;
 }
 .image-container-grid {
 	display: flex;

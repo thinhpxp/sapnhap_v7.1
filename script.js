@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadNewProvincesDropdown();
         displayEventCount();
         displayRealtimeLocations();
-        setInterval(displayRealtimeLocations, 90000);
+        #setInterval(displayRealtimeLocations, 90000);
     }
     // THÊM MỚI: Hàm tải dữ liệu cho dropdown Cũ
     async function loadOldDataDropdowns() {
