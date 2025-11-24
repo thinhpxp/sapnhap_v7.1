@@ -60,7 +60,7 @@ body.modal-open {
 /* --- LAYOUT 2 CỘT --- */
 .container {
 	display: flex;
-	gap: 30px;
+	gap: 5px;
 	width: 100%;
 	max-width: 100%;
 	margin: 0 auto;
@@ -372,7 +372,6 @@ button#lookup-btn:disabled {
 /* --- PHẦN STYLE CỦA VÙNG TRẢ KẾT QUẢ --- */
 #result-container {
     background-color: white;
-	margin-top: 15px;
 	padding: 25px;
 	border-radius: 12px;
 	border: 2px solid #193f63;
@@ -710,7 +709,7 @@ button#lookup-btn:disabled {
 	border: 1px solid var(--border-color);
 	border-radius: 8px;
 	padding: 15px;
-	margin-top: 20px;
+	margin-top: 5px;
 }
 
 #realtime-users-container h4 {
