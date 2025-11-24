@@ -228,7 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (traditionalModeSwitcher) traditionalModeSwitcher.classList.add('hidden');
             // === Ẩn dòng mô tả ===
             if (lookupDescription) lookupDescription.classList.add('hidden');
-
+            // --- Reset khung thông tin về trạng thái chờ ---
+            resultContainer.classList.add('hidden'); // Ẩn kết quả cũ
+            if (initialInstruction) initialInstruction.classList.remove('hidden'); // Hiện lại hướng dẫn
             // Chỉ tải script này một lần duy nhất.
             if (!document.getElementById('quick-search-script')) {
                 console.log("Lần đầu kích hoạt Tra cứu Nhanh. Đang tải script...");
@@ -336,6 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
         lookupDescription.textContent = isReverseMode ?
             t('lookupDescriptionNewToOld') :
             t('lookupDescriptionOldToNew');
+
+        // --- Reset khung thông tin về trạng thái chờ ---
+        resultContainer.classList.add('hidden');
+        if (initialInstruction) initialInstruction.classList.remove('hidden');
     }
 
     // === LẮNG NGHE SỰ KIỆN ===
