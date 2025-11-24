@@ -204,16 +204,27 @@ document.addEventListener('DOMContentLoaded', () => {
         addEventListeners();
         loadOldDataDropdowns(); //Gọi địa chỉ mới
         loadNewProvincesDropdown(); //Gọi địa chỉ cũ
-        // gọi hàm hiển thị lượt tra cứu GOOGLE ANALYTICS
+        // === GỌI CÁC HÀM HIỂN THỊ SỐ LIỆU GOOGLE ANALYTICS ===
+        // Hiển thị lượt tra cứu GOOGLE ANALYTICS
         displayEventCount();
-        setInterval(displayEventCount, 30000);
-        // GỌI HÀM HIỂN THỊ GOOGLE REAL TIME
-        displayRealtimeLocations(); // Hàm mới
-        // Tự động làm mới sau mỗi 60 giây
-        setInterval(displayRealtimeLocations, 75000);
-        setTimeout(() => {
-            loadInitialData();
-        }, 50000);
+        setInterval(displayEventCount, 600000);
+        // Hiển thị GOOGLE REAL TIME
+        displayRealtimeLocations();
+        setInterval(displayRealtimeLocations, 120000);
+
+        // Tùy chọn: Chỉ làm mới khi tab đang hiển thị (Tiết kiệm tài nguyên tối đa)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                displayRealtimeLocations();
+                // Không cần cập nhật event count liên tục khi quay lại tab
+            }
+        });
+
+        /*
+        *   setTimeout(() => {
+        *   loadInitialData();
+        *   }, 50000);
+        */
     }
 
     //QUẢN LÝ CHUYỂN ĐỔI GIAO DIỆN TRA CỨU TRUYỀN THỐNG VÀ QUICK SEARCH
