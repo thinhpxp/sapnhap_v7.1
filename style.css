@@ -368,7 +368,6 @@ button#lookup-btn:disabled {
 /* --- PHẦN STYLE CỦA VÙNG TRẢ KẾT QUẢ --- */
 #result-container {
     background-color: white;
-    margin-top: 15px;
     padding: 25px;
     border-radius: 12px;
     border: 2px solid #193f63;
@@ -377,7 +376,7 @@ button#lookup-btn:disabled {
     /* 1. Giới hạn chiều cao: */
     /* Dùng vh (viewport height) để nó linh hoạt theo màn hình,
        hoặc dùng px nếu muốn cố định. 60vh nghĩa là 60% chiều cao màn hình. */
-    max-height: 60vh;
+    max-height: 75vh;
 
     /* 2. Kích hoạt thanh cuộn dọc khi nội dung tràn */
     overflow-y: auto;
