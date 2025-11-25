@@ -677,13 +677,6 @@ button#lookup-btn:disabled {
 }
 
 /* GOOGLE CITY */
-#realtime-users-container {
-	background-color: #fff;
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
-	padding: 15px;
-	margin-top: 5px;
-}
 
 #realtime-users-container h4 {
 	margin-top: 0;
@@ -1228,7 +1221,7 @@ body.modal-open {
 
 .top-right-split {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     margin-bottom: 15px;
     align-items: stretch; /* 1. Kéo dãn 2 khung bằng nhau về mặt hình ảnh */
 }
@@ -1238,16 +1231,20 @@ body.modal-open {
     flex: 1;
     width: 50%;
     margin-top: 0;
-
     /* 2. Thiết lập chiều cao và thanh cuộn */
     /* Chiều cao này được tính toán dựa trên tổng chiều cao của khối Info bên cạnh */
     /* (170px ảnh + text + padding + margin ~ 340px) */
     height: 100%;
     max-height: 340px;
-
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Ẩn thanh cuộn của chính container nếu có */
+
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 5px;
 }
 
 /* Danh sách địa điểm bên trong */
@@ -1284,15 +1281,14 @@ body.modal-open {
     flex: 1;
     width: 50%;
     margin: 0;
-    padding: 10px; /* Padding gọn gàng */
-    border: 1px solid var(--border-color);
+    /*padding: 10px;*/ /* Padding gọn gàng */
+    /*border: 1px solid var(--border-color);*/
     border-radius: 8px;
     background: var(--surface-color);
-
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    /*justify-content: center;*/
+    /*align-items: center;*/
 }
 
 /* Reset các thuộc tính thừa của .qr-column bên trong */
