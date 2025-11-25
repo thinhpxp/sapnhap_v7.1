@@ -391,13 +391,6 @@ button#lookup-btn:disabled {
     font-size: 1.3em;
     padding-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
-
-    /* Tùy chọn: Giữ tiêu đề luôn nổi ở trên cùng khi cuộn */
-    position: sticky;
-    top: -10px; /* Căn chỉnh vị trí dính (trừ đi padding-top của container nếu cần) */
-    background-color: white; /* Cần nền trắng để che nội dung trôi qua */
-    z-index: 10;
-    padding-top: 5px;
 }
 
 /* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) CHO RESULT CONTAINER --- */
