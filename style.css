@@ -1223,34 +1223,57 @@ body.modal-open {
 }
 /* định dạng vùng chứa thông tin google và thông tin ủng hộ */
 /* =================================================== */
-/* === BỐ CỤC CHIA ĐÔI CỘT PHẢI (ĐÃ FIX LỖI) === */
+/* === BỐ CỤC CHIA ĐÔI CỘT PHẢI (CĂN CHỈNH CHIỀU CAO) === */
 /* =================================================== */
 
 .top-right-split {
     display: flex;
-    gap: 10px; /* Tăng khoảng cách lên 10px cho thoáng */
+    gap: 10px;
     margin-bottom: 15px;
-    align-items: stretch; /* Kéo dãn chiều cao bằng nhau */
+    align-items: stretch; /* QUAN TRỌNG: Ép 2 cột cao bằng nhau */
 }
 
 /* 1. Tùy chỉnh khối Realtime (Bên trái) */
 #realtime-users-container {
     flex: 1;
     width: 50%;
-    margin-top: 0; /* Bỏ margin cũ để khớp với bên phải */
-    height: auto;
+    margin-top: 0;
+
+    /* --- THAY ĐỔI: Biến thành Flex container để quản lý danh sách con --- */
     display: flex;
     flex-direction: column;
-    /* Giữ nguyên border/padding cũ của ID này */
+
+    /* Giữ nguyên style cũ */
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+
+    /* QUAN TRỌNG: Giới hạn chiều cao tối đa để kích hoạt thanh cuộn
+       nếu danh sách dài hơn khối thông tin bên phải */
+    max-height: 220px;
+}
+
+/* Tiêu đề (Header) giữ nguyên */
+#google-analytics-header {
+    flex-shrink: 0; /* Không cho tiêu đề bị co lại */
+    margin-bottom: 10px;
 }
 
 #realtime-locations-list {
+    /* --- THAY ĐỔI: Tự động chiếm hết khoảng trống còn lại --- */
     flex-grow: 1;
-    max-height: 120px;
-    overflow-y: auto; /* Cho phép cuộn nếu danh sách dài */
+
+    /* --- THAY ĐỔI: Bỏ max-height cố định, cho phép cuộn --- */
+    overflow-y: auto;
+    max-height: none; /* Reset giá trị cũ */
+
+    padding-left: 20px;
+    margin: 0;
+    font-size: 0.9em;
 }
 
-/* 2. Tùy chỉnh khối Info (Bên phải) */
+/* 2. Tùy chỉnh khối Info (Bên phải) - LÀM CHUẨN CHIỀU CAO */
 .bottom-info-section {
     flex: 1;
     width: 50%;
@@ -1267,7 +1290,7 @@ body.modal-open {
     align-items: center;
 }
 
-/* --- FIX LỖI 1: TRIỆT TIÊU STYLE CỦA .qr-column KHI NẰM TRONG NÀY --- */
+/* Các style con bên trong khối Info giữ nguyên để đảm bảo hiển thị đẹp */
 .bottom-info-section .qr-column {
     border: none !important;
     box-shadow: none !important;
@@ -1277,7 +1300,6 @@ body.modal-open {
     width: 100%;
 }
 
-/* Tinh chỉnh nội dung bên trong khối Info cho gọn */
 .bottom-info-section .qr-caption {
     font-size: 0.8em;
     margin: 0 0 8px 0;
@@ -1286,17 +1308,16 @@ body.modal-open {
 }
 
 .bottom-info-section .coffee-image-wrapper {
-    margin: 5px 0 10px 0; /* Căn chỉnh khoảng cách trên dưới */
+    margin: 5px 0 10px 0;
     gap: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* --- FIX LỖI 2: SỬ DỤNG PX THAY VÌ % CHO ẢNH --- */
 .bottom-info-section .coffee-support-image,
 .bottom-info-section .bank-qrcode {
-    max-height: 170px; /* Cố định chiều cao pixel để ảnh luôn hiện rõ */
+    max-height: 170px;
     width: auto;
     object-fit: contain;
 }
@@ -1306,32 +1327,33 @@ body.modal-open {
     margin-top: 5px;
 }
 
-/* Ẩn text "Chia sẻ cho bạn bè" để tiết kiệm chỗ */
 .bottom-info-section .sharing-descrtiption {
     display: none;
 }
 
-/* Thu nhỏ nút share */
 .bottom-info-section .share-btn svg {
     width: 20px;
     height: 20px;
 }
 
-/* --- FIX LỖI 3: RESPONSIVE CHO MOBILE --- */
+/* --- RESPONSIVE CHO MOBILE --- */
 @media (max-width: 768px) {
     .top-right-split {
-        flex-direction: column; /* Quay về cột dọc trên điện thoại */
-        gap: 15px;
+        flex-direction: column; /* Quay về cột dọc */
+        align-items: normal; /* Bỏ ép chiều cao trên mobile */
     }
 
     #realtime-users-container,
-    .bottom-info-section { /* Bỏ class compact-mode vì HTML không có */
+    .bottom-info-section {
         width: 100%;
         flex: auto;
-        padding: 15px; /* Tăng padding trên mobile cho dễ nhìn */
+        max-height: none; /* Bỏ giới hạn chiều cao trên mobile */
     }
 
-    /* Trên mobile, cho ảnh to hơn một chút */
+    #realtime-locations-list {
+        max-height: 150px; /* Đặt lại giới hạn cho list trên mobile */
+    }
+
     .bottom-info-section .coffee-support-image,
     .bottom-info-section .bank-qrcode {
         max-height: 45px;
