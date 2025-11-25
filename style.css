@@ -512,34 +512,11 @@ button#lookup-btn:disabled {
 /* Bao quanh ảnh để dễ dàng căn chỉnh */
 .coffee-image-wrapper {
 	display: flex;
-    gap: 20px;
+    gap: 1  0px;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     margin: 15px 0;
-}
-
-/* Định dạng cho ảnh */
-.qr-column .coffee-support-image {
-	max-width: 100%;
-	/* Đảm bảo ảnh không bị tràn ra ngoài cột */
-	height: auto;
-	/* Giữ tỉ lệ khung hình của ảnh */
-	width: 190px;
-	/* Đặt chiều rộng mong muốn cho ảnh (ví dụ: 150px). Điều chỉnh theo ý bạn. */
-	aspect-ratio: auto;
-	display: inline-block;
-	/* Giúp text-align center hoạt động tốt */
-	border-radius: 8px;
-	/* Bo tròn nhẹ góc ảnh (tùy chọn) */
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	/* Thêm đổ bóng nhẹ cho ảnh (tùy chọn) */
-}
-
-/* Định dạng ảnh bank qr ở giao diện tiếng Việt */
-.bank-qrcode, .coffee-support-image {
-    max-height: 150px; /* Giới hạn chiều cao để không quá to */
-    width: auto;
 }
 
 /* Định dạng cho chú thích ảnh */
@@ -1319,7 +1296,7 @@ body.modal-open {
 /* --- FIX LỖI 2: SỬ DỤNG PX THAY VÌ % CHO ẢNH --- */
 .bottom-info-section .coffee-support-image,
 .bottom-info-section .bank-qrcode {
-    max-height: 35px; /* Cố định chiều cao pixel để ảnh luôn hiện rõ */
+    max-height: 170px; /* Cố định chiều cao pixel để ảnh luôn hiện rõ */
     width: auto;
     object-fit: contain;
 }
