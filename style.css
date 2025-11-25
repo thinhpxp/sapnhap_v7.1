@@ -371,47 +371,59 @@ button#lookup-btn:disabled {
     padding: 25px;
     border-radius: 12px;
     border: 2px solid #193f63;
-
-    /* --- CẢI TIẾN UI/UX: THANH CUỘN NỘI BỘ --- */
-    /* 1. Giới hạn chiều cao: */
-    /* Dùng vh (viewport height) để nó linh hoạt theo màn hình,
-       hoặc dùng px nếu muốn cố định. 60vh nghĩa là 60% chiều cao màn hình. */
-    max-height: 75vh;
-
-    /* 2. Kích hoạt thanh cuộn dọc khi nội dung tràn */
-    overflow-y: auto;
-
-    /* 3. Ngăn việc cuộn trang chính khi đang cuộn trong khung này (trải nghiệm tốt hơn) */
-    overscroll-behavior: contain;
 }
 
 #result-container h2 {
-	 margin-top: 0;
+	margin-top: 0;
     font-size: 1.3em;
     padding-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
 }
+/* === CẢI TIẾN THANH CUỘN CHO KẾT QUẢ TRA CỨU === */
 
-/* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) CHO RESULT CONTAINER --- */
-/* Dành cho trình duyệt Chrome, Edge, Safari */
-#result-container::-webkit-scrollbar {
-    width: 8px; /* Độ rộng thanh cuộn */
+/* 1. Thiết lập vùng cuộn cho nội dung kết quả mới */
+#new-address-display {
+    /* Đặt chiều cao tối đa. Nếu nội dung ngắn hơn, nó tự co lại.
+       Nếu dài hơn, nó sẽ dừng ở đây và hiện thanh cuộn. */
+    max-height: 500px;
+
+    /* Kích hoạt thanh cuộn dọc khi nội dung tràn */
+    overflow-y: auto;
+
+    /* Thêm chút khoảng cách bên phải để chữ không dính vào thanh cuộn */
+    padding-right: 10px;
+
+    /* (Tùy chọn) Thêm viền mờ phía trên để tách biệt rõ hơn */
+    /* border-top: 1px dashed #eee; */
+    /* padding-top: 10px; */
 }
 
-#result-container::-webkit-scrollbar-track {
+/* 2. Tùy chỉnh thanh cuộn cho đẹp (chỉ tác dụng trên Chrome/Edge/Safari) */
+#new-address-display::-webkit-scrollbar {
+    width: 6px; /* Độ rộng thanh cuộn mỏng, tinh tế */
+}
+
+#new-address-display::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
-#result-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1; /* Màu thanh cuộn (xám nhẹ) */
-    border-radius: 4px;
+#new-address-display::-webkit-scrollbar-thumb {
+    background: #ccc; /* Màu của thanh trượt */
+    border-radius: 3px;
 }
 
-#result-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8; /* Màu khi di chuột vào */
+#new-address-display::-webkit-scrollbar-thumb:hover {
+    background: #aaa; /* Màu đậm hơn khi di chuột vào */
 }
 
+/* 3. Điều chỉnh cho Mobile (nếu cần) */
+@media (max-width: 768px) {
+    #new-address-display {
+        /* Trên điện thoại có thể giảm chiều cao xuống chút cho vừa màn hình */
+        max-height: 300px;
+    }
+}
 /* --- PHẦN STYLE MỚI VÀ ĐƯỢC CẬP NHẬT --- */
 .address-line {
 	display: flex;
