@@ -521,15 +521,6 @@ button#lookup-btn:disabled {
     margin: 15px 0;
 }
 
-/* Định dạng cho chú thích ảnh */
-.qr-column .qr-caption {
-	margin: 5px;
-	/* Khoảng cách dưới chú thích */
-	font-size: 0.8em;
-	color: black;
-	text-align: justify;
-}
-
 /* === CSS CHO HỘP MÙ VUI VẺ === */
 .mystery-box-container {
 	margin-top: 10px;
@@ -1282,24 +1273,29 @@ body.modal-open {
     flex: 1;
     width: 50%;
     margin-top: 5px;
-    /*padding: 10px;*/ /* Padding gọn gàng */
-    /*border: 1px solid var(--border-color);*/
     border-radius: 8px;
     background: var(--surface-color);
     display: flex;
-    flex-direction: column;
-    /*justify-content: center;*/
-    /*align-items: center;*/
+    align-content: center;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex-direction: row;
 }
 
 /* Reset các thuộc tính thừa của .qr-column bên trong */
 .bottom-info-section .qr-column {
-    border: none !important;
+    /*border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    background: transparent !important;
+    background: transparent !important;*/
+    padding: 10px;
     width: 100%;
+    margin: 5px;
+	/* Khoảng cách dưới chú thích */
+	font-size: 0.8em;
+	color: black;
+	text-align: justify;
 }
 
 .bottom-info-section .qr-caption {
