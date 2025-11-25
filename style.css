@@ -1244,3 +1244,91 @@ body.modal-open {
 .village-changes-container tr:last-child td {
     border-bottom: none; /* Bỏ viền cho dòng cuối */
 }
+/* định dạng vùng chứa thông tin google và thông tin ủng hộ */
+/* === BỐ CỤC CHIA ĐÔI CỘT PHẢI === */
+.top-right-split {
+    display: flex;
+    gap: 5px; /* Khoảng cách giữa 2 khối */
+    margin-bottom: 15px;
+    align-items: stretch; /* Kéo dãn chiều cao bằng nhau */
+}
+
+/* 1. Tùy chỉnh khối Realtime (Bên trái) */
+#realtime-users-container {
+    flex: 1; /* Chiếm 50% */
+    width: 50%;
+    margin-top: 0; /* Bỏ margin cũ */
+    height: auto; /* Để co dãn theo nội dung */
+    display: flex;
+    flex-direction: column;
+}
+
+#realtime-locations-list {
+    flex-grow: 1; /* Để list tự dãn chiếm khoảng trống */
+    max-height: 120px; /* Giới hạn chiều cao list */
+}
+
+/* 2. Tùy chỉnh khối Info (Bên phải) */
+.bottom-info-section {
+    flex: 1; /* Chiếm 50% */
+    width: 50%;
+    margin: 0; /* Reset margin cũ */
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-color);
+
+    /* Căn giữa nội dung */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Tinh chỉnh nội dung bên trong khối Info cho gọn */
+.bottom-info-section .qr-caption {
+    font-size: 0.8em;
+    margin: 0 0 5px 0;
+    text-align: center;
+}
+
+.bottom-info-section .coffee-image-wrapper {
+    margin: 5px 0;
+    gap: 10px;
+}
+
+/* Thu nhỏ ảnh trong chế độ compact */
+.bottom-info-section .coffee-support-image,
+.bottom-info-section .bank-qrcode {
+    max-height: 35px; /* Thu nhỏ ảnh lại */
+    width: auto;
+}
+
+.bottom-info-section .share-buttons {
+    gap: 8px;
+}
+
+/* Ẩn text "Chia sẻ cho bạn bè" để tiết kiệm chỗ */
+.bottom-info-section .sharing-descrtiption {
+    display: none;
+}
+
+/* Thu nhỏ nút share */
+.bottom-info-section .share-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- RESPONSIVE CHO MOBILE --- */
+@media (max-width: 768px) {
+    .top-right-split {
+        flex-direction: column; /* Quay về cột dọc trên điện thoại */
+    }
+
+    #realtime-users-container,
+    .bottom-info-section.compact-mode {
+        width: 100%;
+        flex: auto;
+    }
+}
+/* =================================================== */

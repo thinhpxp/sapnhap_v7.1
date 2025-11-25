@@ -199,50 +199,52 @@
             <button id="show-admin-centers-btn" data-i18n-key="showAdminCentersBtn">Xem Địa chỉ Trung tâm Hành chính</button>
           </div>
         </div>
-        <!-- GOOGLE REAL TIME -->
-        <div id="realtime-users-container">
-          <div id="google-analytics-header">
-            <span id="realtime-total-users" style="font-size: 0.9em;font-weight: 600;"></span> / <span id="event-counter" style="font-size: 0.9em;font-weight: 600;"></span>
+          <!-- KHU VỰC CHỨA MÃ QR VÀ THÔNG TIN KHÁCH TRUY CẬP -->
+          <div class="top-right-split">
+              <!-- GOOGLE REAL TIME -->
+            <div id="realtime-users-container">
+                <div id="google-analytics-header">
+                    <span id="realtime-total-users" style="font-size: 0.9em;font-weight: 600;"></span> / <span id="event-counter" style="font-size: 0.9em;font-weight: 600;"></span>
+                </div>
+                <ul id="realtime-locations-list"> <!-- Dữ liệu sẽ được điền vào đây bởi JS --> </ul>
+            </div>
+            <!-- PHẦN THÔNG TIN ỦNG HỘ -->
+                <div class="bottom-info-section">
+                  <!-- Cột 1 -->
+                  <div class="qr-column">
+                    <p class="qr-caption">Ứng dụng này miễn phí, nhưng tên miền và máy chủ thì không. Nếu bạn muốn hỗ trợ thì có thể ủng hộ mình một ly cà phê hoặc đơn giản hơn là lan tỏa lên mạng xã hội nhé.</p>
+                    <div class="coffee-image-wrapper">
+                      <img src="/vb.webp" alt="Buy me a Coffee Support" class="bank-qrcode">
+                      <a href="https://ko-fi.com/thinhpxp" target="_blank" rel="noopener noreferrer" class="buy-coffee-link">
+                        <img src="/buymeacoffee.webp" alt="Buy me a Coffee Support" class="coffee-support-image">
+                      </a>
+                    </div>
+                    <!-- === NÚT CHIA SẺ MẠNG XÃ HỘI === -->
+                    <div class="social-share-container">
+                      <div class="sharing-descrtiption">Chia sẻ cho bạn bè</div>
+                      <div class="share-buttons">
+                        <!-- Nút chia sẻ Facebook -->
+                        <a href="#" id="share-facebook" class="share-btn facebook" aria-label="Chia sẻ cho bạn bè">
+                          <svg fill="#3239fb" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-337 273 123.5 256" xml:space="preserve" stroke="#3239fb">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                              <path d="M-260.9,327.8c0-10.3,9.2-14,19.5-14c10.3,0,21.3,3.2,21.3,3.2l6.6-39.2c0,0-14-4.8-47.4-4.8c-20.5,0-32.4,7.8-41.1,19.3 c-8.2,10.9-8.5,28.4-8.5,39.7v25.7H-337V396h26.5v133h49.6V396h39.3l2.9-38.3h-42.2V327.8z"></path>
+                            </g>
+                          </svg>
+                        </a>
+                        <!-- Nút chia sẻ X (Twitter) -->
+                        <a href="#" id="share-x" class="share-btn x" aria-label="Chia sẻ lên X">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="bi bi-twitter-x" viewBox="0 0 16 16" id="Twitter-X--Streamline-Bootstrap" height="24" width="24">
+                            <path d="M12.6 0.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867 -5.07 -4.425 5.07H0.316l5.733 -6.57L0 0.75h5.063l3.495 4.633L12.601 0.75Zm-0.86 13.028h1.36L4.323 2.145H2.865z" stroke-width="1"></path>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
           </div>
-          <ul id="realtime-locations-list">
-            <!-- Dữ liệu sẽ được điền vào đây bởi JS -->
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- PHẦN HÌNH ẢNH -->
-    <div class="bottom-info-section">
-      <!-- Cột 1 -->
-      <div class="qr-column">
-        <p class="qr-caption">Ứng dụng này miễn phí, nhưng tên miền và máy chủ thì không. Nếu bạn muốn hỗ trợ thì có thể ủng hộ mình một ly cà phê hoặc đơn giản hơn là lan tỏa lên mạng xã hội nhé.</p>
-        <div class="coffee-image-wrapper">
-          <img src="/vb.webp" alt="Buy me a Coffee Support" class="bank-qrcode">
-          <a href="https://ko-fi.com/thinhpxp" target="_blank" rel="noopener noreferrer" class="buy-coffee-link">
-            <img src="/buymeacoffee.webp" alt="Buy me a Coffee Support" class="coffee-support-image">
-          </a>
-        </div>
-        <!-- === NÚT CHIA SẺ MẠNG XÃ HỘI === -->
-        <div class="social-share-container">
-          <div class="sharing-descrtiption">Chia sẻ cho bạn bè</div>
-          <div class="share-buttons">
-            <!-- Nút chia sẻ Facebook -->
-            <a href="#" id="share-facebook" class="share-btn facebook" aria-label="Chia sẻ cho bạn bè">
-              <svg fill="#3239fb" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-337 273 123.5 256" xml:space="preserve" stroke="#3239fb">
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                  <path d="M-260.9,327.8c0-10.3,9.2-14,19.5-14c10.3,0,21.3,3.2,21.3,3.2l6.6-39.2c0,0-14-4.8-47.4-4.8c-20.5,0-32.4,7.8-41.1,19.3 c-8.2,10.9-8.5,28.4-8.5,39.7v25.7H-337V396h26.5v133h49.6V396h39.3l2.9-38.3h-42.2V327.8z"></path>
-                </g>
-              </svg>
-            </a>
-            <!-- Nút chia sẻ X (Twitter) -->
-            <a href="#" id="share-x" class="share-btn x" aria-label="Chia sẻ lên X">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="bi bi-twitter-x" viewBox="0 0 16 16" id="Twitter-X--Streamline-Bootstrap" height="24" width="24">
-                <path d="M12.6 0.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867 -5.07 -4.425 5.07H0.316l5.733 -6.57L0 0.75h5.063l3.495 4.633L12.601 0.75Zm-0.86 13.028h1.36L4.323 2.145H2.865z" stroke-width="1"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
+          <!-- =================================== -->
       </div>
     </div>
     <!-- =================================== -->
