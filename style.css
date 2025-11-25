@@ -1228,7 +1228,7 @@ body.modal-open {
     /* Chiều cao này được tính toán dựa trên tổng chiều cao của khối Info bên cạnh */
     /* (170px ảnh + text + padding + margin ~ 340px) */
     height: 100%;
-    max-height: 340px;
+    max-height: 300px;
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Ẩn thanh cuộn của chính container nếu có */
@@ -1267,7 +1267,6 @@ body.modal-open {
     background: #aaa;
 }
 
-
 /* --- KHỐI PHẢI: THÔNG TIN & QR --- */
 .bottom-info-section {
     flex: 1;
@@ -1295,7 +1294,6 @@ body.modal-open {
 
 .bottom-info-section .qr-caption {
     font-size: 0.8em;
-    margin: 0 0 8px 0;
     text-align: justify; /* Căn đều 2 bên cho đẹp */
     line-height: 1.3;
 }
