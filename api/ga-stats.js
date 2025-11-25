@@ -2,22 +2,24 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { createClient } from '@supabase/supabase-js';
 
-// 1. Khởi tạo Google Analytics Client
-const analyticsDataClient = new BetaAnalyticsDataClient({
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-});
 const propertyId = process.env.GA4_PROPERTY_ID;
 
-// 2. Khởi tạo Supabase Client (Dùng Service Role để ghi đè RLS)
+// Khởi tạo Supabase Client
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Cấu hình thời gian cache (tính bằng mili giây)
-const CACHE_DURATION = {
-    events: 15 * 60 * 1000,    // 15 phút cho tổng sự kiện
-    realtime: 2 * 60 * 1000    // 2 phút cho realtime
+// CẤU HÌNH THỜI GIAN (Tính bằng GIÂY để dùng cho Header Cache-Control)
+const CACHE_TTL = {
+    events: 900,    // 15 phút (900 giây) - Tổng số liệu không cần cập nhật nhanh
+    realtime: 120   // 2 phút (120 giây) - Realtime cập nhật nhanh hơn
+};
+
+// Cấu hình thời gian check database (tính bằng mili giây)
+const DB_CACHE_DURATION = {
+    events: CACHE_TTL.events * 1000,
+    realtime: CACHE_TTL.realtime * 1000
 };
 
 const CLICK_EVENTS_TO_SUM = [
@@ -27,10 +29,20 @@ const CLICK_EVENTS_TO_SUM = [
     'Event_lookup_button_click'
 ];
 
+// --- HÀM KHỞI TẠO GA CLIENT AN TOÀN ---
+function getAnalyticsClient() {
+    try {
+        // Cố gắng parse JSON, nếu lỗi (do format biến môi trường) sẽ catch ngay
+        const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+        return new BetaAnalyticsDataClient({ credentials });
+    } catch (error) {
+        console.error("LỖI CẤU HÌNH GOOGLE CREDENTIALS:", error.message);
+        throw new Error("Lỗi cấu hình server: Không thể đọc thông tin xác thực Google.");
+    }
+}
+
 export default async function handler(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
-  // Vẫn giữ cache trình duyệt nhẹ để giảm request tới server Vercel
-  response.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
   const { report } = request.query;
 
@@ -38,8 +50,15 @@ export default async function handler(request, response) {
       return response.status(400).json({ error: "Invalid report type" });
   }
 
+  // === TỐI ƯU QUAN TRỌNG NHẤT ===
+  // Thiết lập Cache-Control dựa trên loại báo cáo.
+  // s-maxage: Thời gian Vercel CDN lưu kết quả (trong thời gian này Supabase sẽ KHÔNG bị gọi).
+  // stale-while-revalidate: Cho phép dùng bản cũ thêm 1 khoảng thời gian trong lúc Vercel update bản mới ngầm.
+  const ttl = CACHE_TTL[report];
+  response.setHeader('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=60`);
+
   try {
-      // --- BƯỚC 1: KIỂM TRA CACHE TỪ SUPABASE ---
+      // 1. KIỂM TRA CACHE TỪ SUPABASE (Chỉ chạy khi Vercel Cache hết hạn)
       const cacheKey = `ga_${report}`;
       const { data: cacheData, error: cacheError } = await supabase
           .from('api_cache')
@@ -52,25 +71,27 @@ export default async function handler(request, response) {
 
       if (cacheData && !cacheError) {
           const lastUpdate = new Date(cacheData.updated_at);
-          // Nếu dữ liệu còn mới (chưa quá thời gian cache), dùng luôn
-          if (now - lastUpdate < CACHE_DURATION[report]) {
+          if (now - lastUpdate < DB_CACHE_DURATION[report]) {
               shouldRefresh = false;
               return response.status(200).json(cacheData.data);
           }
       }
 
-      // --- BƯỚC 2: NẾU CACHE CŨ HOẶC KHÔNG CÓ, GỌI GOOGLE API ---
+      // 2. NẾU CẦN LÀM MỚI, GỌI GOOGLE API
       if (shouldRefresh) {
+          const analyticsClient = getAnalyticsClient();
+
           let resultData = {};
 
           if (report === 'events') {
-              resultData = await fetchEventCountFromGA();
+              resultData = await fetchEventCountFromGA(analyticsClient);
           } else {
-              resultData = await fetchRealtimeFromGA();
+              resultData = await fetchRealtimeFromGA(analyticsClient);
           }
 
-          // --- BƯỚC 3: LƯU KẾT QUẢ MỚI VÀO SUPABASE ---
-          // Sử dụng upsert để cập nhật hoặc tạo mới
+          // 3. LƯU CACHE VÀO SUPABASE
+          // Lưu ý: Đừng dùng 'await' ở đây nếu muốn phản hồi nhanh hơn cho user (Fire and Forget)
+          // Nhưng để đảm bảo dữ liệu nhất quán, dùng await cũng ổn vì tần suất thấp.
           await supabase
               .from('api_cache')
               .upsert({
@@ -83,16 +104,15 @@ export default async function handler(request, response) {
       }
 
   } catch (error) {
-      console.error('Lỗi Server:', error);
-      // Nếu lỗi server, cố gắng trả về dữ liệu cũ nếu có trong DB thay vì báo lỗi 500
-      return response.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+      console.error('Lỗi API ga-stats:', error);
+      return response.status(500).json({ error: error.message || 'Lỗi máy chủ nội bộ.' });
   }
 }
 
-// --- CÁC HÀM GỌI GA (Tách riêng để gọn code) ---
+// --- CÁC HÀM GỌI GA (Giữ nguyên logic cũ) ---
 
-async function fetchEventCountFromGA() {
-    const [gaResponse] = await analyticsDataClient.runReport({
+async function fetchEventCountFromGA(client) {
+    const [gaResponse] = await client.runReport({
         property: `properties/${propertyId}`,
         dateRanges: [{ startDate: '2025-07-01', endDate: 'today' }],
         dimensions: [{ name: 'eventName' }],
@@ -115,8 +135,8 @@ async function fetchEventCountFromGA() {
     return { totalClicks, allEvents: eventCounts };
 }
 
-async function fetchRealtimeFromGA() {
-    const [realtimeResponse] = await analyticsDataClient.runRealtimeReport({
+async function fetchRealtimeFromGA(client) {
+    const [realtimeResponse] = await client.runRealtimeReport({
         property: `properties/${propertyId}`,
         dimensions: [{ name: 'city' }, { name: 'country' }],
         metrics: [{ name: 'activeUsers' }],
