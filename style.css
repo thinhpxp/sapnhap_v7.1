@@ -415,7 +415,14 @@ button#lookup-btn:disabled { background-color: #a7caff; border-color: #a7caff; c
     padding-bottom: 10px;
     margin-bottom: 10px;
 }
-
+#google-analytics-header {
+    font-size: 0.9em;
+    color: : 0.9em;
+    color: #000000;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
 #realtime-locations-list {
     list-style-type: '🌍';
     padding-left: 20px;
