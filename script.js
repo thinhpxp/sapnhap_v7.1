@@ -555,6 +555,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+        // === LOGIC PHÓNG TO ẢNH ĐƠN GIẢN ===
+        const qrImages = document.querySelectorAll('.bank-qrcode');
+        qrImages.forEach(img => {
+        img.addEventListener('click', function() {
+            // 1. Tạo lớp phủ (Overlay)
+            const overlay = document.createElement('div');
+            overlay.className = 'simple-zoom-overlay';
+
+            // 2. Tạo ảnh mới giống hệt ảnh được click
+            const zoomedImg = document.createElement('img');
+            zoomedImg.src = this.src;
+            zoomedImg.alt = this.alt;
+
+            // 3. Gắn ảnh vào overlay và overlay vào body
+            overlay.appendChild(zoomedImg);
+            document.body.appendChild(overlay);
+
+            // 4. Đóng khi click vào bất cứ đâu trên overlay
+            overlay.addEventListener('click', () => {
+                overlay.remove(); // Xóa hoàn toàn khỏi DOM
+            });
+        });
+    });
 
     }
 
