@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // === QUẢN LÝ TRẠNG THÁI ===
     let allProvincesData = [];
     let isReverseMode = false;
-    let newWardCodeForModal = null; // THÊM MỚI: Biến để lưu mã xã mới cho modal
-    let newProvinceCodeForModal = null; // THÊM MỚI: Biến để lưu mã tỉnh mới cho modal
+    window newWardCodeForModal = null; // THÊM MỚI: Biến để lưu mã xã mới cho modal
+    window newProvinceCodeForModal = null; // THÊM MỚI: Biến để lưu mã tỉnh mới cho modal
     let removeAccents = false; // Mặc định là TẮT (hiển thị có dấu)
     let provinceChoices, districtChoices, communeChoices;
     let newProvinceChoices, newCommuneChoices;
@@ -1041,7 +1041,7 @@ function handleVillageToggle(button) {
 
     async function handleShowAdminCenters() {
         // Biến newWardCodeForModal và newProvinceCodeForModal sẽ được gán trong các hàm tra cứu.
-        if (!newWardCodeForModal || !newProvinceCodeForModal) {
+        if (!window.newWardCodeForModal || !window.newProvinceCodeForModal) {
             console.error("Thiếu mã xã hoặc tỉnh để tra cứu trung tâm hành chính.");
             return;
         }
@@ -1050,7 +1050,7 @@ function handleVillageToggle(button) {
         modalBody.innerHTML = `<p>${t('loading', 'Đang tải...')}</p>`;
 
         try {
-            const response = await fetch(`/api/get-admin-centers?ward_code=${newWardCodeForModal}&province_code=${newProvinceCodeForModal}`);
+            const response = await fetch(`/api/get-admin-centers?ward_code=${window.newWardCodeForModal}&province_code=${window.newProvinceCodeForModal}`);
 
             if (!response.ok) throw new Error('Could not fetch administrative centers.');
             const data = await response.json();

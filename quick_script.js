@@ -195,7 +195,7 @@ function renderVillageChanges(villageData, title) {
     `;
 }
 
-    function renderForwardLookupResult(data, fullOldAddress) {
+function renderForwardLookupResult(data, fullOldAddress) {
     const { events, village_changes } = data;
     const villageHtml = renderVillageChanges(village_changes, t('villageChangesTitle', 'Thay đổi cấp Thôn/Tổ dân phố:'));
 
@@ -251,6 +251,14 @@ function renderVillageChanges(villageData, title) {
             <div class="address-codes"><span class="label">New Code:</span> ${newCodes}</div>`;
         newAddressDisplay.innerHTML = resultsHtml + villageHtml;
     }
+    // Cập nhật biến toàn cục để Modal bên script.js đọc được
+        if (data.events && data.events.length > 0) {
+            window.newWardCodeForModal = data.events[0].new_ward_code;
+            window.newProvinceCodeForModal = data.events[0].new_province_code;
+
+            // QUAN TRỌNG: Xóa class hidden để hiện nút
+            if (adminCenterActions) adminCenterActions.classList.remove('hidden');
+        }
 }
 
     // === PHẦN 2: Cập nhật hàm renderReverseLookupResult với debug chi tiết ===
@@ -319,6 +327,15 @@ function renderReverseLookupResult(data, fullNewAddress) {
     } else {
         newAddressDisplay.innerHTML = `<p class="no-change">${t('noDataFoundMessage')}</p>`;
     }
+    //Cập nhat biến toàn cục để Modal bên script.js đọc được
+    if (data && data.length > 0) {
+             // Cập nhật biến toàn cục
+            window.newWardCodeForModal = data[0].new_ward_code;
+            window.newProvinceCodeForModal = data[0].new_province_code;
+
+            // QUAN TRỌNG: Xóa class hidden để hiện nút
+            if (adminCenterActions) adminCenterActions.classList.remove('hidden');
+        }
 }
 
     // === THÊM EVENT DELEGATION CHO CÁC NÚT TOGGLE ===
