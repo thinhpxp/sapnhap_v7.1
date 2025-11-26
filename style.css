@@ -425,13 +425,11 @@ button#lookup-btn:disabled { background-color: #a7caff; border-color: #a7caff; c
 }
 #realtime-locations-list {
     list-style-type: '🌍';
-    padding-left: 20px;
     margin: 0;
     flex-grow: 1; /* Dãn ra chiếm chỗ */
     overflow-y: auto; /* Cuộn ở đây */
-    font-size: 0.9em;
+    font-size: 0.8em;
     max-height: none; /* Bỏ max-height cứng để theo flex */
-    padding-right: 5px;
 }
 
 #realtime-locations-list li {
