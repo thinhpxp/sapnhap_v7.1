@@ -171,7 +171,7 @@ input:checked+.slider:before { transform: translateX(22px); }
     background-color: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 7px 7px;
+    padding: 7px 0px;
     font-size: 13px;
     min-height: auto;
 }

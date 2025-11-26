@@ -1,7 +1,7 @@
 /* PHẦN STYLE CỦA THƯ VIỆN CHOICE */
 .choices {
   position: relative;
-  overflow: hidden;
+  /*overflow: hidden;*/
   margin-bottom: 12px;
   font-size: 16px;
 }
