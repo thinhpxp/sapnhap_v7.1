@@ -1,4 +1,3 @@
-/*style gemini 3 pro*/
 /* --- NHẬP FONT CHỮ MỀM MẠI HƠN TỪ GOOGLE FONTS --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -503,15 +502,29 @@ button#lookup-btn:disabled { background-color: #a7caff; border-color: #a7caff; c
 .bottom-info-section .social-share-container {
     padding: 0;
     width: 100%;
+    display: flex;
+    align-items: center;     /* Căn giữa theo chiều dọc */
+    justify-content: center; /* Căn giữa toàn bộ khối theo chiều ngang */
+    gap: 15px;               /* Khoảng cách giữa dòng chữ và các nút */
 }
-.bottom-info-section .sharing-descrtiption { display: none; } /* Ẩn text thừa */
+/* Hiển thị lại dòng text và căn chỉnh */
+.bottom-info-section .sharing-descrtiption {
+    display: block;          /* QUAN TRỌNG: Đổi từ none sang block để hiện lại */
+    margin: 0;               /* Bỏ margin thừa */
+    font-size: 0.8em;
+    font-weight: 600;
+    white-space: nowrap;     /* Giữ text trên 1 dòng, không bị rớt xuống */
+}
 .bottom-info-section .share-buttons {
+    display: flex;
     gap: 10px;
-    margin-top: 5px;
+    margin-top: 0;
     justify-content: center;
 }
 .bottom-info-section .share-btn svg {
-    width: 20px; height: 20px;
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 /* --- CÁC THÀNH PHẦN KHÁC (Modal, Feedback, Mystery Box...) --- */
