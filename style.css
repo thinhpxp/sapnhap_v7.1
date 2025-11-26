@@ -52,7 +52,7 @@ body.modal-open {
 
 .left-column-content-wrapper {
     max-width: 100%;
-    margin: 0 auto;
+    margin: 5px 10px;
 }
 
 .head-lookup-description {
