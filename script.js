@@ -623,7 +623,7 @@ function renderVillageChanges(villageData, title) {
    return `
         <div class="village-changes-wrapper">
             <button class="village-toggle-btn" data-target="${containerId}">
-                ${title} (${villageData.length} thay đổi)
+                ${title} (${villageData.length} ${t('changes', 'thay đổi')})
                 <span class="toggle-arrow">▼</span>
             </button>
             <div id="${containerId}" class="village-changes-container">
@@ -789,7 +789,7 @@ function renderVillageChanges(villageData, title) {
                     //const province = record.old_province_name;
                     const fullOldAddress = `${record.old_ward_name}, ${record.old_district_name}, ${record.old_province_name}`;
                     const oldCodes = `${record.old_ward_code}, ${record.old_district_code}, ${record.old_province_code}`;
-                    const villageHtml = renderVillageChanges(record.village_changes, `Thay đổi tại ${record.old_ward_name}:`);
+                    const villageHtml = renderVillageChanges(record.village_changes, `${t('changes', 'thay đổi tại')} ${record.old_ward_name}`);
                     return `
                                         <li>
                                             ${fullOldAddress}

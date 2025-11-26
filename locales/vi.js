@@ -102,6 +102,8 @@ window.translations = {
   "quickSearchNewLabel": "Tìm theo tên Xã Phường mới",
   "quickSearchNewPlaceholder": "Gõ tên xã/phường mới...",
 // ...
-"provinceBecameNote": "Ghi chú: <b>{old_name}</b> nay đã trở thành một phần của <b>{new_name}</b>.",
-"provinceFormedFromNote": "Ghi chú: <b>{new_name}</b> được hợp thành từ các tỉnh/thành phố: <b>{source_names}</b>.",
+    "provinceBecameNote": "Ghi chú: <b>{old_name}</b> nay đã trở thành một phần của <b>{new_name}</b>.",
+    "provinceFormedFromNote": "Ghi chú: <b>{new_name}</b> được hợp thành từ các tỉnh/thành phố: <b>{source_names}</b>.",
+// Khóa để dịch các nội dung thay đổi cấp TDP/thôn
+    "changes": "thay đổi tại",
 };

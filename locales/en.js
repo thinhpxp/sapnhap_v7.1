@@ -103,7 +103,9 @@ window.translations = {
   "quickSearchOldPlaceholder": "Type old commune/ward name...",
   "quickSearchNewLabel": "Search by new address name",
   "quickSearchNewPlaceholder": "Type new commune/ward name...",
-// ...
-"provinceBecameNote": "Note: <b>{old_name}</b> has now become part of <b>{new_name}</b>.",
-"provinceFormedFromNote": "Note: <b>{new_name}</b> was formed from the following provinces/cities: <b>{source_names}</b>.",
+    // ...
+    "provinceBecameNote": "Note: <b>{old_name}</b> has now become part of <b>{new_name}</b>.",
+    "provinceFormedFromNote": "Note: <b>{new_name}</b> was formed from the following provinces/cities: <b>{source_names}</b>.",
+    // Khóa để dịch các nội dung thay đổi cấp TDP/thôn
+    "changes": "changes",
 };
