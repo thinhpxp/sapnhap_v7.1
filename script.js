@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // === QUẢN LÝ TRẠNG THÁI ===
     let allProvincesData = [];
     let isReverseMode = false;
-    window newWardCodeForModal = null; // THÊM MỚI: Biến để lưu mã xã mới cho modal
-    window newProvinceCodeForModal = null; // THÊM MỚI: Biến để lưu mã tỉnh mới cho modal
+    window.newWardCodeForModal = null; // THÊM MỚI: Biến để lưu mã xã mới cho modal
+    window.newProvinceCodeForModal = null; // THÊM MỚI: Biến để lưu mã tỉnh mới cho modal
     let removeAccents = false; // Mặc định là TẮT (hiển thị có dấu)
     let provinceChoices, districtChoices, communeChoices;
     let newProvinceChoices, newCommuneChoices;
