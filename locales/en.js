@@ -107,5 +107,5 @@ window.translations = {
     "provinceBecameNote": "Note: <b>{old_name}</b> has now become part of <b>{new_name}</b>.",
     "provinceFormedFromNote": "Note: <b>{new_name}</b> was formed from the following provinces/cities: <b>{source_names}</b>.",
     // Khóa để dịch các nội dung thay đổi cấp TDP/thôn
-    "changes": "changes",
+    "changes": "changes in",
 };
