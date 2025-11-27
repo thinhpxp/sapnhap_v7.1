@@ -14,6 +14,9 @@
 }
 
 /* --- THIẾT LẬP CƠ BẢN --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-color);
@@ -42,7 +45,7 @@ body.modal-open {
 
 /* Cột Trái: Nhập liệu */
 .left-column {
-    flex: 0 0 35%;
+    flex: 4; /* Chiếm 4 phần (khoảng 40%), tự động co dãn linh hoạt */
     min-width: 320px;
     background: var(--surface-color);
     padding: 15px;
@@ -65,7 +68,7 @@ body.modal-open {
 
 /* Cột Phải: Kết quả & Thông tin */
 .right-column {
-    flex: 1;
+    flex: 6;
     padding-top: 0px;
 }
 
