@@ -37,7 +37,7 @@ body.modal-open {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
-    align-items: flex-start;
+    align-items: normal;
 }
 
 /* Cột Trái: Nhập liệu */
