@@ -771,7 +771,7 @@ function renderVillageChanges(villageData, title) {
                 const newAddressForCopy = `${fullNewAddress} (Codes: ${newCodesReverse})`;
                 let newAddressHtml = `
                                                             <div class="address-line">
-                                                                <p><span class="label">${t('newAddressLabel').replace(':', '')}</span> ${fullNewAddress}</p>
+                                                                <p><span class="label">${t('newAddressLabel')}</span> ${fullNewAddress}</p>
                                                                 <button class="copy-btn" title="Copy" data-copy-text="${newAddressForCopy}">${copyIconSvg}</button>
                                                             </div>
                                                             <div class="address-codes"><span class="label">New Code:</span> ${newCodesReverse}</div>`;
@@ -803,7 +803,7 @@ function renderVillageChanges(villageData, title) {
                 newProvinceCodeForModal = data[0].new_province_code;
                 if (adminCenterActions) adminCenterActions.classList.remove('hidden');
             } else {
-                oldAddressDisplay.innerHTML = `<div class="address-line"><p><span class="label">${t('newAddressLabel').replace(':', '')}</span> ${fullNewAddress}</p></div>`;
+                oldAddressDisplay.innerHTML = `<div class="address-line"><p><span class="label">${t('newAddressLabel')}</span> ${fullNewAddress}</p></div>`;
                 newAddressDisplay.innerHTML = `<p class="no-change">${t('noDataFoundMessage')}</p>`;
             }
         } catch (error) {
