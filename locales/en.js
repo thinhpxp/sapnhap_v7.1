@@ -108,4 +108,5 @@ window.translations = {
     "provinceFormedFromNote": "Note: <b>{new_name}</b> was formed from the following provinces/cities: <b>{source_names}</b>.",
     // Khóa để dịch các nội dung thay đổi cấp TDP/thôn
     "changes": "changes in",
+    "blogLinkText": "Read our blog for more information about the mergers.",
 };

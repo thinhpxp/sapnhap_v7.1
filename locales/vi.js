@@ -106,4 +106,5 @@ window.translations = {
     "provinceFormedFromNote": "Ghi chú: <b>{new_name}</b> được hợp thành từ các tỉnh/thành phố: <b>{source_names}</b>.",
 // Khóa để dịch các nội dung thay đổi cấp TDP/thôn
     "changes": "thay đổi tại",
+    "blogLinkText": "Xem danh sách chi tiết 34 tỉnh thành phố mới.",
 };

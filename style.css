@@ -739,3 +739,22 @@ footer p { margin-top: 10px; margin-bottom: 0; }
     to { opacity: 1; }
 }
 /* === END CSS CHO PHÓNG TO ẢNH ĐƠN GIẢN === */
+/* === CSS CHO PHẦN blog-link-container === */
+.blog-link-container {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.9em;
+  font-weight: 300;          /* chữ mảnh, nhẹ */
+  line-height: 3.6;          /* thoáng, dễ đọc */
+  letter-spacing: 0.8px;       /* giãn nhẹ cho hiện đại */
+  text-align: center;        /* căn giữa */
+}
+
+.blog-link-container a {
+  text-decoration: none;
+  color: #ff0000;   /* bạn có thể tùy chỉnh màu chữ */
+}
+.blog-link-container a:hover {
+  text-decoration: underline;   /* nếu muốn hiệu ứng khi hover */
+  text-decoration-color: #555;  /* màu gạch chân khi hover */
+}
+
