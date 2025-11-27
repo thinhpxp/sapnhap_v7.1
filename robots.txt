@@ -17,4 +17,4 @@ Disallow: /package.json
 Disallow: /package-lock.json
 
 # Location of the sitemap
-Sitemap: https://sapnhap.org/sitemap.xml
+Sitemap: https://sapnhap.org/sitemap.xml; https://sapnhap.org/blog-sitemap.xml
