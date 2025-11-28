@@ -744,9 +744,10 @@ footer p { margin-top: 10px; margin-bottom: 0; }
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 0.9em;
   font-weight: 300;          /* chữ mảnh, nhẹ */
-  line-height: 3.6;          /* thoáng, dễ đọc */
+  line-height: 1.6;          /* thoáng, dễ đọc */
   letter-spacing: 0.8px;       /* giãn nhẹ cho hiện đại */
   text-align: center;        /* căn giữa */
+  margin: 5px 0 0 0;
 }
 
 .blog-link-container a {
