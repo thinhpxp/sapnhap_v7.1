@@ -662,19 +662,29 @@ footer p { margin-top: 10px; margin-bottom: 0; }
 .popup-close:hover { color: #000; }
 
 /* --- RESPONSIVE MOBILE (CUỐI FILE) --- */
+/* Tablet & Màn hình nhỏ hơn Desktop */
 @media (max-width: 1024px) {
     .container {
         flex-direction: column;
         max-width: 600px;
+        align-items: stretch; /* Kéo dãn chiều ngang cho full màn hình */
     }
     .left-column, .right-column {
         flex: auto;
+        width: 100%; /* Bắt buộc chiếm 100% chiều rộng */
+        min-width: unset; /* QUAN TRỌNG: Gỡ bỏ giới hạn min-width 320px của Desktop để không bị tràn màn hình */
     }
 }
-
+/* Điện thoại */
 @media (max-width: 768px) {
-    body { padding: 20px 10px; }
-    .left-column, .right-column { padding: 0; }
+     body {
+        padding: 10px; /* Giảm padding body để có thêm không gian cho nội dung */
+    }
+
+    .left-column, .right-column {
+        /* QUAN TRỌNG: Giữ lại padding bên trong cột để chữ không dính vào viền */
+        padding: 15px;
+    }
 
     .top-right-split {
         flex-direction: column; /* Quay về cột dọc trên mobile */
@@ -690,6 +700,14 @@ footer p { margin-top: 10px; margin-bottom: 0; }
     .bottom-info-section {
         width: 100%;
         flex: auto;
+        /* Nếu cần, có thể chuyển về cột dọc trên mobile để ảnh to hơn */
+        flex-direction: column;
+    }
+
+    /* Trên mobile, ảnh trong info section nên nhỏ lại chút hoặc giữ nguyên tùy ý */
+    .bottom-info-section .coffee-support-image,
+    .bottom-info-section .bank-qrcode {
+        max-height: 150px;
     }
 
     #new-address-display {
