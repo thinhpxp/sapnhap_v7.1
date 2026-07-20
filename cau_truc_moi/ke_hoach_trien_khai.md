@@ -56,6 +56,61 @@ Nginx Host (:8083) — Reverse Proxy
 
 ---
 
+## Giải pháp bảo mật và chống DDoS (Lượng truy cập lớn ~2000 CCU)
+
+Với đặc thù hệ thống công cộng không đăng nhập, có nhiều form/input, nguy cơ bị spam (feedback, bot cào dữ liệu) hoặc DDoS làm sập PostgreSQL/Valkey là rất lớn. Chúng ta áp dụng giải pháp bảo mật **4 lớp** đồng bộ:
+
+### Lớp 1: Cấu hình Cloudflare WAF & Cache Rule (Quan trọng nhất)
+Vì server nằm sau Cloudflare Tunnel, ta có thể chặn đứng 90% các cuộc tấn công ngay tại Edge Network của Cloudflare trước khi nó tiếp cận máy chủ Fedora của bạn:
+1. **Cloudflare Cache Rules cho API**:
+   - Dữ liệu sáp nhập địa giới hành chính (2023-2025) là dữ liệu lịch sử tĩnh, **không bao giờ thay đổi**.
+   - Cấu hình Cache Rule trên Cloudflare Dashboard: Cache toàn bộ các request `GET /api/lookup?*` và `GET /api/new-geo-data?*` với TTL **7 ngày** ở Edge.
+   - Khi có luồng truy cập lớn vào cùng một địa phương (ví dụ: link chia sẻ MXH), **99.9% request sẽ được trả về trực tiếp từ Edge CDN của Cloudflare**, tải của máy chủ Fedora lúc này bằng 0.
+2. **Cloudflare WAF / Rate Limiting**:
+   - Bật luật chặn nếu 1 IP gửi quá 5 request `/api/feedback` trong 1 phút.
+   - Bật Challenge (bắt xác thực trình duyệt) nếu 1 IP gửi quá 60 request tra cứu/tìm kiếm trong 1 phút.
+3. **Cloudflare Turnstile (Chống Spam Feedback)**:
+   - Tích hợp Cloudflare Turnstile widget (miễn phí, không làm phiền người dùng như CAPTCHA truyền thống) vào Form Góp ý.
+   - Backend Fastify sẽ kiểm chứng Turnstile token trước khi ghi nhận feedback và gửi tin nhắn Telegram. Ngăn chặn triệt để 100% các script spam tự động.
+
+### Lớp 2: Giới hạn tần suất (Rate Limiting) tại Nginx Host
+Phòng trường hợp bypass được Cloudflare hoặc bị scan cổng nội bộ:
+1. **nginx `limit_req_zone`**:
+   - Định nghĩa vùng giới hạn tần suất trong nginx:
+     ```nginx
+     # Trong nginx.conf hoặc sapnhap.conf
+     limit_req_zone $binary_remote_addr zone=feedback_limit:10m rate=12r/m; # Max 1 request/5s
+     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=5r/s;       # Max 5 requests/s
+     ```
+   - Áp dụng vào Nginx location proxy:
+     ```nginx
+     location /api/feedback {
+         limit_req zone=feedback_limit burst=3 nodelay;
+         proxy_pass http://127.0.0.1:3000;
+     }
+     location /api/ {
+         limit_req zone=api_limit burst=15 nodelay;
+         proxy_pass http://127.0.0.1:3000;
+     }
+     ```
+2. **Bảo vệ bằng tĩnh hóa (Static Offloading)**:
+   - Nginx phục vụ trực tiếp các file tĩnh (`vi.html`, `en.html`, `locales/`, `assets/`, `blog/`). Không cho các request này đi qua Node.js. Nginx xử lý tĩnh cực kỳ nhanh và tốn rất ít RAM, dễ dàng cân hơn 10.000 CCU.
+
+### Lớp 3: Caching tại Fastify qua Valkey & Tối ưu Database
+1. **Valkey Key-Value Cache**:
+   - Mỗi truy vấn tra cứu (lookup) thành công sẽ được cache vào Valkey dưới dạng JSON string với key `sapnhap:lookup:forward:<ward_code>` và TTL **24 giờ**.
+   - Khi có request tới, Fastify check Valkey trước. Nếu có, trả về ngay lập tức (<1ms). Việc này giải phóng PostgreSQL hoàn toàn khỏi tải đọc lặp đi lặp lại.
+2. **PostgreSQL Connection Pool**:
+   - Đặt `max` connections của Postgres pool ở mức vừa phải (khoảng `30` connections). Giúp bảo vệ CPU của PostgreSQL không bị quá tải khi bị spam đột biến.
+
+### Lớp 4: Cản lọc và Debounce tại Frontend Client
+1. **Debounce tìm kiếm nhanh (Quick Search)**:
+   - Sử dụng debounce **300ms** trên input. Nghĩa là chỉ gửi request lên API khi người dùng đã ngừng gõ phím được 300ms. Tránh việc người dùng gõ từ "Hà Nội" gửi đi 6-7 request API cùng lúc.
+2. **Tránh Double-click (Button Throttling)**:
+   - Vô hiệu hóa (disable) nút "Tra Cứu" và nút "Gửi Feedback" ngay sau khi click, chỉ kích hoạt lại sau 2 giây. Ngăn chặn người dùng bấm liên tục nhiều lần gửi trùng request.
+
+---
+
 ## Proposed Changes
 
 ### Component 1: Backend — Fastify Server
