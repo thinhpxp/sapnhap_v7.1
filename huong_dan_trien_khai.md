@@ -1,24 +1,27 @@
-# Hướng dẫn Triển khai sapnhap.org lên Máy chủ Fedora 44
+# Hướng dẫn Triển khai sapnhap.thinhpxp.io.vn lên Máy chủ Fedora 44
 
-Tài liệu này dành cho **kỹ thuật viên** thực hiện việc triển khai hoặc cập nhật mã nguồn lên máy chủ Fedora 44. Toàn bộ quy trình được chia thành 3 phần độc lập:
+Tài liệu này hướng dẫn chi tiết quy trình triển khai và cập nhật hệ thống **Tra cứu sáp nhập đơn vị hành chính** (tên miền: `sapnhap.thinhpxp.io.vn`) trên máy chủ Fedora 44. 
 
-- [Phần 1](#phần-1--cấu-trúc-mã-nguồn) — Cấu trúc mã nguồn & phân loại các tệp cần copy
-- [Phần 2](#phần-2--tải-về-cơ-sở-dữ-liệu-từ-supabase) — Tải về & chuyển đổi cơ sở dữ liệu từ Supabase
-- [Phần 3](#phần-3--setup-từng-bước-trên-máy-chủ) — Setup từng bước trên máy chủ
+Toàn bộ tài liệu được chia thành 3 phần độc lập:
+
+- [Phần 1](#phần-1--cấu-trúc-mã-nguồn-mới) — Cấu trúc mã nguồn mới & phân loại tệp triển khai
+- [Phần 2](#phần-2--tải-về-cơ-sở-dữ-liệu-từ-supabase) — Tải về dữ liệu từ Supabase.com
+- [Phần 3](#phần-3--setup-từng-bước-trên-máy-chủ-fedora-44) — Setup từng bước trên máy chủ Fedora 44
 
 ---
 
-## Phần 1 — Cấu trúc Mã nguồn
+## Phần 1 — Cấu trúc Mã nguồn Mới
 
-### Tổng quan cây thư mục
+Dự án đã được tái cấu trúc thành các thư mục độc lập, phân định rõ ràng giữa **Backend (API)**, **Frontend (Tệp tĩnh)**, **Data (Dữ liệu tĩnh)**, **DB (Schema SQL)** và **Deploy (Cấu hình hạ tầng)**:
 
 ```
 sapnhap_v7.1/                    ← Gốc kho mã nguồn (git repository)
 │
-├── 📂 server/                   ← [BACKEND] Fastify TypeScript API
+├── 📂 backend/                  ← [BACKEND] Fastify TypeScript API
 │   ├── index.ts                 #  Entry point: khởi tạo Fastify server
 │   ├── db.ts                    #  PostgreSQL Pool + Circuit Breaker
-│   ├── cache.ts                 #  Valkey client (ioredis wrapper)
+│   ├── cache.ts                 #  Valkey client (ioredis wrapper DB 2)
+│   ├── old_data.d.ts            #  Type declaration cho data/old_data.js
 │   ├── middleware/
 │   │   └── anti-scrape.ts       #  Middleware chống scraping tự động
 │   ├── routes/
@@ -31,141 +34,85 @@ sapnhap_v7.1/                    ← Gốc kho mã nguồn (git repository)
 │   │   └── ga-stats.ts          #  GET /api/ga-stats
 │   ├── utils/
 │   │   └── alert.ts             #  Gửi cảnh báo Telegram
-│   ├── package.json             #  Dependencies: fastify, pg, ioredis, ...
-│   ├── tsconfig.json            #  TypeScript config
-│   └── dist/                   ← [GENERATED] Kết quả biên dịch TypeScript → JS
+│   ├── package.json             #  Dependencies: fastify, pg, ioredis...
+│   ├── tsconfig.json            #  TypeScript configuration
+│   └── dist/                    ← [GENERATED] Build output (npm run build)
 │
-├── 📂 api/_data/
-│   └── old_data.js              ← [DATA] Dữ liệu hành chính cũ (~2.2 MB, tĩnh)
+├── 📂 frontend/                 ← [FRONTEND] Tệp tĩnh do Nginx phục vụ
+│   ├── vi.html                  #  Trang chính tiếng Việt
+│   ├── en.html                  #  Trang chính tiếng Anh
+│   ├── script.js                #  Logic điều khiển giao diện chính
+│   ├── quick_script.js          #  Logic tra cứu nhanh (lazy-loaded)
+│   ├── style.css                #  Stylesheet chính
+│   ├── choices.min.js           #  Thư viện dropdown vendor
+│   ├── choices.min.css          #  Style choices.js
+│   ├── favicon.png              #  Icon website (đặt tại web root)
+│   ├── robots.txt               #  SEO rules
+│   ├── sitemap.xml              #  Sitemap chính
+│   ├── blog-sitemap.xml         #  Sitemap blog
+│   ├── 📂 vi/                   #  Subpages tiếng Việt (about.html, contact.html, policies.html)
+│   ├── 📂 en/                   #  Subpages tiếng Anh (about.html, contact.html, policies.html)
+│   ├── 📂 locales/              #  Chuỗi ngôn ngữ i18n (vi.js, en.js)
+│   ├── 📂 blog/                 #  39 trang blog HTML tĩnh
+│   └── 📂 assets/               #  Hình ảnh & tracking script (tracking.js, social-preview.png...)
+│
+├── 📂 data/                     ← [DATA] Dữ liệu tĩnh lớn
+│   └── old_data.js              #  Dữ liệu hành chính cũ (~2.2 MB)
 │
 ├── 📂 db/                       ← [DATABASE] Schema & Indexes SQL
-│   ├── schema.sql               #  DDL tạo tất cả bảng dữ liệu
+│   ├── schema.sql               #  DDL tạo tất cả 9 bảng dữ liệu
 │   └── indexes.sql              #  Indexes + pg_trgm full-text search
 │
-├── 📂 deploy/                   ← [DEPLOY] Cấu hình triển khai
-│   ├── .env.example             #  Mẫu biến môi trường (KHÔNG chứa bí mật thật)
+├── 📂 deploy/                   ← [DEPLOY] Cấu hình hạ tầng & hệ thống
+│   ├── .env.example             #  Mẫu biến môi trường (KHÔNG chứa secret thật)
 │   ├── docker-run.sh            #  Script chạy Docker container
 │   ├── nginx/
-│   │   └── sapnhap.conf         #  Cấu hình Nginx (cổng 8083, rate limit, proxy)
+│   │   └── sapnhap.conf         #  Cấu hình Nginx (cổng 8083, sapnhap.thinhpxp.io.vn)
 │   └── systemd/
-│       ├── sapnhap-api.service  #  Quản lý container bằng systemd
+│       ├── sapnhap-api.service  #  Systemd service quản lý container API
 │       ├── sapnhap-feedback.service
-│       └── sapnhap-feedback.timer  #  Cron job Thứ 7 17:00 gửi feedback Telegram
+│       └── sapnhap-feedback.timer # Lịch cron Thứ 7 17:00 gửi Telegram
 │
-├── Dockerfile                   ← [DOCKER] Build Docker image backend
+├── 📂 scripts/                  ← [SCRIPTS] Utility scripts (không deploy)
+│   └── posts.js                 #  Script xử lý bài viết cũ
 │
-│ ──── FRONTEND (Tệp tĩnh, phục vụ qua Nginx) ────
-│
-├── vi.html                      ← Trang chính tiếng Việt
-├── en.html                      ← Trang chính tiếng Anh
-├── script.js                    ← Logic frontend (Vanilla ES Modules)
-├── style.css                    ← Stylesheet chính
-├── choices.min.js               ← Thư viện dropdown (vendor)
-├── choices.min.css              ← Stylesheet choices.js
-├── 📂 locales/
-│   ├── vi.js                    #  Chuỗi ngôn ngữ tiếng Việt
-│   └── en.js                    #  Chuỗi ngôn ngữ tiếng Anh
-├── 📂 assets/
-│   └── tracking.js              #  Google Analytics tracking
-├── 📂 blog/                     ← Các trang blog tĩnh (39 tệp HTML)
-│   ├── index.html
-│   └── *.html
-├── favicon.png
-├── robots.txt
-├── sitemap.xml
-└── blog-sitemap.xml
+└── Dockerfile                   ← [DOCKER] Build image backend Fastify
 ```
 
 ---
 
-### Phân loại tệp theo mục đích deploy
+### Phân loại tệp khi triển khai
 
-#### 🟦 Nhóm 1 — Tệp Frontend (copy vào `/var/www/sapnhap/`)
-
-Đây là các tệp tĩnh do Nginx phục vụ trực tiếp. Cần copy **toàn bộ** các tệp dưới đây mỗi khi có thay đổi giao diện hoặc nội dung:
-
-| Tệp / Thư mục | Mô tả |
-|---|---|
-| `vi.html` | Trang chính tiếng Việt |
-| `en.html` | Trang chính tiếng Anh |
-| `script.js` | Logic điều khiển giao diện |
-| `style.css` | Stylesheet tổng thể |
-| `choices.min.js` | Thư viện dropdown |
-| `choices.min.css` | Style của choices.js |
-| `locales/` | Thư mục chuỗi ngôn ngữ (vi.js, en.js) |
-| `assets/` | Tracking script Google Analytics |
-| `blog/` | Toàn bộ 39 trang blog HTML |
-| `favicon.png` | Icon website |
-| `robots.txt` | SEO crawl rules |
-| `sitemap.xml`, `blog-sitemap.xml` | Sitemaps cho SEO |
-
-> [!TIP]
-> **Khi nào cần copy lại nhóm này?** Bất cứ khi nào chỉnh sửa giao diện (`vi.html`, `en.html`, `style.css`, `script.js`), thêm bài blog mới, hoặc cập nhật chuỗi ngôn ngữ.
-
-#### 🟩 Nhóm 2 — Backend API (build + copy vào Docker image)
-
-Tệp backend nằm trong `server/`. Kỹ thuật viên **không copy trực tiếp** thư mục `server/` lên server mà phải thực hiện quy trình build + Docker:
-
-```
-server/ → (npm run build) → server/dist/ → (docker build) → sapnhap-api:latest
-```
-
-> [!IMPORTANT]
-> **Khi nào cần build lại Docker?** Bất cứ khi nào có thay đổi trong thư mục `server/` (thêm route mới, sửa logic query, thay đổi cấu hình, v.v.).
-
-#### 🟨 Nhóm 3 — Dữ liệu hành chính cũ (copy vào Docker image)
-
-- **Tệp:** `api/_data/old_data.js` (~2.2 MB)
-- Đây là dữ liệu **tĩnh cố định**, hiếm khi thay đổi.
-- Được đóng gói vào Docker image thông qua `Dockerfile`.
-
-#### 🟥 Nhóm 4 — Config hạ tầng (copy vào hệ thống máy chủ)
-
-| Tệp | Đích trên máy chủ | Khi nào cần copy |
-|---|---|---|
-| `deploy/nginx/sapnhap.conf` | `/etc/nginx/conf.d/sapnhap.conf` | Khi thay đổi cấu hình Nginx |
-| `deploy/systemd/sapnhap-api.service` | `/etc/systemd/system/` | Khi thay đổi service |
-| `deploy/systemd/sapnhap-feedback.service` | `/etc/systemd/system/` | Khi thay đổi cron |
-| `deploy/systemd/sapnhap-feedback.timer` | `/etc/systemd/system/` | Khi thay đổi lịch cron |
-| `deploy/docker-run.sh` | `/usr/local/bin/docker-run.sh` | Khi thay đổi tham số Docker |
-
-#### ⬛ Nhóm 5 — Cần tạo thủ công trên server (KHÔNG nằm trong git)
-
-| Tệp | Vị trí | Ghi chú |
-|---|---|---|
-| `.env` (thực tế) | `/etc/sapnhap/.env` | Tạo từ `deploy/.env.example`, điền thông tin thật |
-
-> [!CAUTION]
-> Tệp `.env` thực tế **TUYỆT ĐỐI KHÔNG** được commit vào git vì chứa mật khẩu và khóa bí mật.
+| Nhóm | Đường dẫn mã nguồn | Vị trí trên server | Mô tả |
+|---|---|---|---|
+| 🟦 **Frontend** | `frontend/*` | `/var/www/sapnhap/` | Nginx phục vụ trực tiếp (tĩnh) |
+| 🟩 **Backend API** | `backend/` | Docker container `sapnhap-api` | Biên dịch TS → đóng gói Docker |
+| 🟨 **Data Tĩnh** | `data/old_data.js` | Đóng gói vào Docker container | Node.js import để làm API fallback |
+| 🟥 **Hạ tầng** | `deploy/` | `/etc/nginx/conf.d/`, `/etc/systemd/system/` | Nginx config, systemd unit files |
+| ⬛ **Bí mật** | `/etc/sapnhap/.env` | `/etc/sapnhap/.env` (tạo thủ công) | Biến môi trường thực tế |
 
 ---
 
 ## Phần 2 — Tải về Cơ sở dữ liệu từ Supabase
 
-Cơ sở dữ liệu hiện tại nằm trên Supabase. Để chuyển sang PostgreSQL tự quản, cần export toàn bộ dữ liệu. Có **2 cách** tùy theo quyền truy cập bạn có.
+Cơ sở dữ liệu cũ đang nằm trên Supabase.com. Chọn một trong hai cách dưới đây để tải dữ liệu về:
 
-### Cách A — Dùng `pg_dump` (Khuyến nghị — Nhanh và đầy đủ nhất)
+### Cách A — Sử dụng `pg_dump` (Khuyên dùng — Nhanh & Đầy đủ)
 
-#### Bước A1. Lấy thông tin kết nối Database từ Supabase Dashboard
-
-1. Đăng nhập vào [app.supabase.com](https://app.supabase.com) → chọn project **sapnhap.org**
-2. Vào **Project Settings** (icon bánh răng, thanh bên trái)
-3. Chọn tab **Database**
-4. Kéo xuống mục **Connection string** → chọn tab **URI**
-5. Copy chuỗi kết nối có dạng:
+#### Bước A1. Lấy URI kết nối từ Supabase Dashboard
+1. Truy cập [app.supabase.com](https://app.supabase.com) → Chọn dự án **sapnhap.org**
+2. Vào **Project Settings** (icon bánh răng) → **Database**
+3. Tìm mục **Connection string** → chọn **URI**
+4. Chuỗi kết nối có dạng:
    ```
-   postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxx.supabase.co:5432/postgres
+   postgresql://postgres:[PASSWORD]@db.xxxxxxxxxx.supabase.co:5432/postgres
    ```
 
-> [!NOTE]
-> Thay `[YOUR-PASSWORD]` bằng mật khẩu database thực tế. Mật khẩu được đặt lúc tạo project, hoặc reset tại **Project Settings → Database → Reset database password**.
-
-#### Bước A2. Chạy `pg_dump` trên máy tính local
-
-Mở terminal trên máy tính của bạn (yêu cầu đã cài PostgreSQL client):
+#### Bước A2. Chạy `pg_dump` trên máy tính cá nhân
+Mở terminal trên máy tính của bạn (đã cài PostgreSQL client):
 
 ```bash
-# Export dữ liệu các bảng cần thiết (không export schema)
+# Export chỉ dữ liệu (data-only) của 8 bảng chính
 pg_dump \
   --no-owner \
   --no-acl \
@@ -178,89 +125,73 @@ pg_dump \
   --table=province_admin_centers \
   --table=province_mergers \
   --table=feedback \
-  "postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxx.supabase.co:5432/postgres" \
+  "postgresql://postgres:[PASSWORD]@db.xxxxxxxxxx.supabase.co:5432/postgres" \
   > sapnhap_data_export.sql
 ```
 
 > [!NOTE]
-> Cờ `--data-only` chỉ export dữ liệu, không export schema (vì chúng ta sẽ dùng `db/schema.sql` của dự án mới để tạo bảng).
-> Cờ `--no-owner --no-acl` tránh lỗi quyền sở hữu không khớp giữa Supabase và PostgreSQL mới.
-
-#### Bước A3. Kiểm tra file xuất
-
-```bash
-# Kiểm tra kích thước file
-ls -lh sapnhap_data_export.sql
-
-# Xem 30 dòng đầu để xác nhận dữ liệu
-head -n 30 sapnhap_data_export.sql
-```
+> Cờ `--data-only` đảm bảo chỉ tải dữ liệu, không ghi đè schema (schema mới được tối ưu tại `db/schema.sql`).
+> Bảng `api_cache` của Supabase **không cần export** vì đã chuyển sang dùng Valkey.
 
 ---
 
-### Cách B — Export CSV qua Supabase Table Editor (Dự phòng nếu không có quyền pg_dump)
+### Cách B — Export CSV qua Supabase Table Editor (Dự phòng)
 
-Nếu không thể kết nối `pg_dump` trực tiếp:
+Nếu không có quyền kết nối trực tiếp cổng 5432 của Supabase:
 
 1. Vào **Supabase Dashboard** → **Table Editor**
-2. Chọn từng bảng theo thứ tự, click **Export CSV** ở góc trên phải mỗi bảng:
-   - `merger_events`
-   - `village_changes`
-   - `old_wards`
-   - `new_wards`
-   - `ward_admin_centers`
-   - `province_admin_centers`
-   - `province_mergers`
-   - `feedback` (tùy chọn — chứa góp ý người dùng)
+2. Lần lượt chọn từng bảng và bấm **Export CSV** ở góc trên bên phải:
+   - `merger_events.csv`
+   - `village_changes.csv`
+   - `old_wards.csv`
+   - `new_wards.csv`
+   - `ward_admin_centers.csv`
+   - `province_admin_centers.csv`
+   - `province_mergers.csv`
+   - `feedback.csv`
 
-> [!WARNING]
-> Bảng `api_cache` của Supabase **không cần export** — trong kiến trúc mới chúng ta dùng Valkey thay thế hoàn toàn.
-
-Sau khi có file CSV, import vào PostgreSQL bằng lệnh (ví dụ với bảng `merger_events`):
-
+Import vào PostgreSQL trên máy chủ sau khi tạo bảng:
 ```bash
 psql -h 127.0.0.1 -U sapnhap_api -d sapnhap \
-  -c "\COPY merger_events FROM '/tmp/merger_events.csv' CSV HEADER;"
+  -c "\COPY merger_events FROM '/tmp/sapnhap_db/merger_events.csv' CSV HEADER;"
 ```
 
-Lặp lại cho từng bảng còn lại.
+---
+
+## Phần 3 — Setup từng bước trên Máy chủ Fedora 44
+
+> [!IMPORTANT]
+> Thực hiện các bước sau trên máy chủ Fedora 44 với tài khoản có quyền `sudo`.
 
 ---
 
-## Phần 3 — Setup từng bước trên Máy chủ
-
-> [!NOTE]
-> Toàn bộ hướng dẫn dưới đây được thực hiện **trên máy chủ Fedora 44** với tư cách người dùng có quyền `sudo`. Thứ tự các bước rất quan trọng.
-
----
-
-### Bước 1 — Tạo người dùng và cơ sở dữ liệu PostgreSQL
+### Bước 1 — Khởi tạo PostgreSQL Database
 
 ```bash
-# Kết nối vào PostgreSQL với quyền superuser
+# Kết nối PostgreSQL với quyền superuser
 sudo -u postgres psql
 ```
 
-Trong `psql`, chạy các lệnh SQL sau:
+Trong giao diện `psql`, chạy các câu lệnh SQL:
 
 ```sql
--- Tạo user mới với mật khẩu mạnh (thay bằng mật khẩu thực tế)
+-- 1. Tạo user sapnhap_api với mật khẩu mạnh
 CREATE USER sapnhap_api WITH PASSWORD 'MatKhauSieuManh_ThayDoiNgay!';
 
--- Tạo database mới, gán quyền sở hữu cho user vừa tạo
+-- 2. Tạo database sapnhap do sapnhap_api làm chủ sở hữu
 CREATE DATABASE sapnhap OWNER sapnhap_api;
 
--- Kết nối vào database sapnhap
+-- 3. Kết nối vào DB sapnhap
 \c sapnhap
 
--- Cấp toàn quyền trên schema public
+-- 4. Phân quyền schema public
 GRANT ALL ON SCHEMA public TO sapnhap_api;
 GRANT ALL PRIVILEGES ON DATABASE sapnhap TO sapnhap_api;
 
--- Bảo vệ DB: giới hạn số connection tối đa
+-- 5. Bảo vệ DB: giới hạn max 35 kết nối đồng thời
 ALTER ROLE sapnhap_api CONNECTION LIMIT 35;
 
--- Bảo vệ DB: tự kill query chạy quá 5 giây
+-- 6. Tự động hủy query chạy lâu quá 5 giây
 ALTER ROLE sapnhap_api SET statement_timeout = '5s';
 
 \q
@@ -268,9 +199,9 @@ ALTER ROLE sapnhap_api SET statement_timeout = '5s';
 
 ---
 
-### Bước 2 — Cho phép Docker container kết nối vào PostgreSQL và Valkey
+### Bước 2 — Cấu hình Phân quyền Mạng cho Docker Container
 
-#### 2.1 Cấu hình `pg_hba.conf` cho phép Docker network
+#### 2.1 Cho phép dải IP Docker trong `pg_hba.conf`
 
 ```bash
 sudo nano /var/lib/pgsql/16/data/pg_hba.conf
@@ -279,7 +210,7 @@ sudo nano /var/lib/pgsql/16/data/pg_hba.conf
 Thêm dòng sau vào cuối file:
 
 ```
-# Cho phép Docker containers (dải 172.17.0.0/16) kết nối vào database sapnhap
+# Allow Docker Bridge Gateway (172.17.0.0/16) to connect to sapnhap database
 host    sapnhap    sapnhap_api    172.17.0.0/16    md5
 ```
 
@@ -289,17 +220,17 @@ Khởi động lại PostgreSQL:
 sudo systemctl restart postgresql-16
 ```
 
-#### 2.2 Mở cổng Firewall cho Docker
+#### 2.2 Mở cản lọc Firewalld cho Docker
 
 ```bash
-# Cho phép Docker kết nối PostgreSQL (cổng 5432)
+# Mở cổng 5432 (PostgreSQL) cho dải Docker 172.17.0.0/16
 sudo firewall-cmd --permanent --add-rich-rule='
   rule family="ipv4"
   source address="172.17.0.0/16"
   port port="5432" protocol="tcp"
   accept'
 
-# Cho phép Docker kết nối Valkey (cổng 6379)
+# Mở cổng 6379 (Valkey) cho dải Docker 172.17.0.0/16
 sudo firewall-cmd --permanent --add-rich-rule='
   rule family="ipv4"
   source address="172.17.0.0/16"
@@ -309,287 +240,252 @@ sudo firewall-cmd --permanent --add-rich-rule='
 sudo firewall-cmd --reload
 ```
 
-> [!NOTE]
-> Nếu draftinghub đã chạy trên cùng server và đã thêm các rule này, bước 2.2 có thể bỏ qua.
-
 ---
 
-### Bước 3 — Import Schema và Dữ liệu vào PostgreSQL
+### Bước 3 — Import Schema và Dữ liệu
 
-#### 3.1 Tải file database lên server
+#### 3.1 Tải file SQL lên server
+Trên máy tính cá nhân, chạy lệnh `scp`:
 
 ```bash
-# Chạy lệnh này trên MÁY TÍNH CỦA BẠN (không phải server)
 scp db/schema.sql db/indexes.sql sapnhap_data_export.sql \
-  user@<địa-chỉ-server>:/tmp/sapnhap_db/
+  user@<ip-server-fedora>:/tmp/sapnhap_db/
 ```
 
-#### 3.2 Tạo schema (cấu trúc bảng)
+#### 3.2 Chạy import cấu hình bảng & dữ liệu trên Fedora
 
 ```bash
+# 1. Tạo 9 bảng DDL
 psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/schema.sql
-```
 
-Kết quả mong đợi: in ra 9 dòng `CREATE TABLE`
-
-#### 3.3 Tạo indexes và kích hoạt full-text search
-
-```bash
+# 2. Tạo Indexes và Full-text search pg_trgm
 psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/indexes.sql
-```
 
-#### 3.4 Import dữ liệu từ Supabase
-
-```bash
-# Nếu dùng file pg_dump (Cách A):
+# 3. Import dữ liệu từ Supabase
 psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/sapnhap_data_export.sql
-```
 
-Xác nhận số bản ghi đã được import:
-
-```bash
+# 4. Kiểm tra số lượng bản ghi
 psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -c "
-  SELECT 'merger_events'       AS bang, COUNT(*) FROM merger_events
-  UNION ALL
-  SELECT 'village_changes',             COUNT(*) FROM village_changes
-  UNION ALL
-  SELECT 'old_wards',                   COUNT(*) FROM old_wards
-  UNION ALL
-  SELECT 'new_wards',                   COUNT(*) FROM new_wards;
+  SELECT 'merger_events' AS bang, COUNT(*) FROM merger_events
+  UNION ALL SELECT 'village_changes', COUNT(*) FROM village_changes
+  UNION ALL SELECT 'old_wards', COUNT(*) FROM old_wards
+  UNION ALL SELECT 'new_wards', COUNT(*) FROM new_wards;
 "
 ```
 
 ---
 
-### Bước 4 — Tạo file biến môi trường `.env`
+### Bước 4 — Tạo tệp cấu hình bí mật `/etc/sapnhap/.env`
 
 ```bash
-# Tạo thư mục config bí mật ngoài web root và ngoài git
+# Tạo thư mục bảo mật ngoài web root và git repo
 sudo mkdir -p /etc/sapnhap
 
-# Copy file mẫu
+# Copy tệp mẫu
 sudo cp /opt/sapnhap/deploy/.env.example /etc/sapnhap/.env
 
-# Phân quyền chặt — chỉ root đọc được
+# Phân quyền chỉ root được đọc
 sudo chmod 600 /etc/sapnhap/.env
 sudo chown root:root /etc/sapnhap/.env
 
-# Chỉnh sửa và điền thông tin thực tế
+# Điền thông tin cấu hình thực tế
 sudo nano /etc/sapnhap/.env
 ```
 
-Các thông tin cần điền:
+Nội dung cần cập nhật trong `/etc/sapnhap/.env`:
 
-| Biến | Giá trị cần điền |
-|---|---|
-| `DATABASE_URL` | URL kết nối PostgreSQL với mật khẩu thật |
-| `VALKEY_URL` | URL Valkey với mật khẩu thật, DB index 2 |
-| `CRON_SECRET` | Chuỗi bí mật ngẫu nhiên ≥ 32 ký tự |
-| `TURNSTILE_SECRET_KEY` | Lấy từ Cloudflare Dashboard → Turnstile |
-| `GA4_PROPERTY_ID` | Property ID từ Google Analytics |
-| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | JSON Service Account từ Google Cloud |
-| `TELEGRAM_BOT_TOKEN` | Token từ @BotFather trên Telegram |
-| `TELEGRAM_CHAT_ID` | Chat ID của nhóm/kênh nhận cảnh báo |
+```env
+# PostgreSQL connection (IP Docker Gateway 172.17.0.1)
+DATABASE_URL=postgresql://sapnhap_api:MatKhauSieuManh_ThayDoiNgay!@172.17.0.1:5432/sapnhap
+
+# Valkey connection (Dùng DB index 2 để không đụng hàng với SmartDraftingHub)
+VALKEY_URL=redis://:MatKhauValkeyServer@172.17.0.1:6379/2
+
+PORT=3000
+NODE_ENV=production
+
+# Key ngẫu nhiên bí mật cho Cron job feedback (tối thiểu 32 ký tự)
+CRON_SECRET=thay_the_bang_chuoi_bi_mat_ngau_nhien_32_ky_tu
+
+# Cloudflare Turnstile (xác thực chống spam form feedback)
+TURNSTILE_SECRET_KEY=
+
+# Google Analytics 4
+GA4_PROPERTY_ID=
+GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account",...}
+
+# Telegram Bot (Gửi tin nhắn góp ý & cảnh báo DDoS/Circuit Breaker)
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+```
 
 ---
 
-### Bước 5 — Build mã nguồn và Docker image
-
-#### 5.1 Clone hoặc pull mã nguồn
-
-```bash
-# Lần đầu:
-git clone <repository-url> /opt/sapnhap
-
-# Cập nhật:
-cd /opt/sapnhap && git pull origin main
-```
-
-#### 5.2 Build TypeScript backend
-
-```bash
-cd /opt/sapnhap/server
-npm install
-npm run build
-
-# Xác nhận build thành công
-ls dist/index.js
-```
-
-#### 5.3 Build Docker image
+### Bước 5 — Biên dịch Backend & Build Docker Image
 
 ```bash
 cd /opt/sapnhap
+
+# 1. Cập nhật mã nguồn
+git pull origin fedora
+
+# 2. Biên dịch TypeScript backend
+cd backend
+npm install
+npm run build
+
+# 3. Build Docker Container từ thư mục gốc
+cd /opt/sapnhap
 docker build -t sapnhap-api:latest .
 
-# Xác nhận image đã tạo
+# 4. Kiểm tra Docker Image đã sẵn sàng
 docker images | grep sapnhap-api
 ```
 
 ---
 
-### Bước 6 — Cài đặt và kích hoạt Docker qua systemd
+### Bước 6 — Đăng ký Service & Timer với Systemd
 
 ```bash
-# Copy script khởi động
+# Copy script khởi tạo Docker container
 sudo cp /opt/sapnhap/deploy/docker-run.sh /usr/local/bin/docker-run.sh
 sudo chmod +x /usr/local/bin/docker-run.sh
 
-# Copy file systemd
+# Copy các tệp Systemd unit
 sudo cp /opt/sapnhap/deploy/systemd/sapnhap-api.service      /etc/systemd/system/
 sudo cp /opt/sapnhap/deploy/systemd/sapnhap-feedback.service  /etc/systemd/system/
 sudo cp /opt/sapnhap/deploy/systemd/sapnhap-feedback.timer    /etc/systemd/system/
 
-# Reload daemon và kích hoạt service
+# Reload systemd và kích hoạt service
 sudo systemctl daemon-reload
 sudo systemctl enable --now sapnhap-api
 sudo systemctl enable --now sapnhap-feedback.timer
 
-# Kiểm tra trạng thái
-sudo systemctl status sapnhap-api
-docker logs sapnhap-api
-```
-
-Kiểm tra container đang chạy:
-
-```bash
+# Thử nghiệm endpoint Healthcheck của Backend
 curl http://localhost:3000/health
-# Kết quả mong đợi: {"status":"ok","timestamp":"2026-..."}
+# Trả về: {"status":"ok","timestamp":"2026-..."}
 ```
 
 ---
 
-### Bước 7 — Deploy Frontend (tệp tĩnh) lên Nginx Web Root
+### Bước 7 — Deploy Frontend (Tệp tĩnh) lên Web Root
 
 ```bash
-# Tạo thư mục web root
+# 1. Tạo thư mục web root cho Nginx
 sudo mkdir -p /var/www/sapnhap
 
-# Copy toàn bộ tệp tĩnh
-sudo cp /opt/sapnhap/vi.html          /var/www/sapnhap/
-sudo cp /opt/sapnhap/en.html          /var/www/sapnhap/
-sudo cp /opt/sapnhap/script.js        /var/www/sapnhap/
-sudo cp /opt/sapnhap/style.css        /var/www/sapnhap/
-sudo cp /opt/sapnhap/choices.min.js   /var/www/sapnhap/
-sudo cp /opt/sapnhap/choices.min.css  /var/www/sapnhap/
-sudo cp /opt/sapnhap/favicon.png      /var/www/sapnhap/
-sudo cp /opt/sapnhap/robots.txt       /var/www/sapnhap/
-sudo cp /opt/sapnhap/sitemap.xml      /var/www/sapnhap/
-sudo cp /opt/sapnhap/blog-sitemap.xml /var/www/sapnhap/
-sudo cp -r /opt/sapnhap/locales/      /var/www/sapnhap/
-sudo cp -r /opt/sapnhap/assets/       /var/www/sapnhap/
-sudo cp -r /opt/sapnhap/blog/         /var/www/sapnhap/
+# 2. Đồng bộ toàn bộ thư mục frontend/ vào web root
+sudo cp -r /opt/sapnhap/frontend/* /var/www/sapnhap/
 
-# Phân quyền cho Nginx
+# 3. Phân quyền sở hữu cho Nginx / Apache
 sudo chown -R nginx:nginx /var/www/sapnhap
 sudo chmod -R 755 /var/www/sapnhap
 ```
 
 ---
 
-### Bước 8 — Cài đặt Nginx
+### Bước 8 — Cài đặt Nginx Configuration
 
 ```bash
-# Copy cấu hình
+# Copy file cấu hình sapnhap.conf (đã cấu hình tên miền sapnhap.thinhpxp.io.vn)
 sudo cp /opt/sapnhap/deploy/nginx/sapnhap.conf /etc/nginx/conf.d/sapnhap.conf
 
-# Kiểm tra cú pháp
+# Kiểm tra cú pháp Nginx
 sudo nginx -t
+# Kết quả mong đợi:
 # nginx: configuration file /etc/nginx/nginx.conf syntax is ok
 # nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-# Áp dụng (không cần restart toàn bộ)
+# Reload Nginx
 sudo nginx -s reload
 ```
 
-**SELinux (Fedora mặc định bật):**
+#### Cấu hình SELinux (dành cho Fedora 44):
 
 ```bash
-# Cho phép Nginx đọc file tĩnh
+# Cho phép Nginx đọc nội dung web root
 sudo setsebool -P httpd_read_user_content 1
 
-# Cho phép Nginx proxy đến Fastify :3000
+# Cho phép Nginx proxy kết nối ra cổng nội bộ 3000
 sudo setsebool -P httpd_can_network_connect 1
 ```
 
 ---
 
-### Bước 9 — Cấu hình Cloudflare Tunnel
+### Bước 9 — Cấu hình Cloudflare Tunnel cho `sapnhap.thinhpxp.io.vn`
 
-Chỉnh sửa file `~/.cloudflared/config.yml` (hoặc `/etc/cloudflared/config.yml`):
+Chỉnh sửa tệp cấu hình Cloudflare Tunnel daemon (thường nằm ở `/etc/cloudflared/config.yml`):
 
 ```yaml
 tunnel: <tunnel-uuid>
-credentials-file: /root/.cloudflared/<tunnel-uuid>.json
+credentials-file: /etc/cloudflared/<tunnel-uuid>.json
 
 ingress:
-  # Sapnhap → Nginx nội bộ cổng 8083
-  - hostname: sapnhap.org
-    service: http://127.0.0.1:8083
-  - hostname: www.sapnhap.org
+  # Tên miền mới: sapnhap.thinhpxp.io.vn trỏ về Nginx host cổng 8083
+  - hostname: sapnhap.thinhpxp.io.vn
     service: http://127.0.0.1:8083
 
-  # (Giữ nguyên rule của các dịch vụ khác nếu có)
+  # (Giữ nguyên các tên miền khác trên cùng máy chủ nếu có, ví dụ SmartDraftingHub)
+  - hostname: smartdraftinghub.com
+    service: http://127.0.0.1:8082
+
   - service: http_status:404
 ```
 
-Đăng ký DNS và khởi động lại:
+Đăng ký CNAME DNS tự động qua Cloudflare Tunnel CLI:
 
 ```bash
-cloudflared tunnel route dns <tunnel-name> sapnhap.org
-cloudflared tunnel route dns <tunnel-name> www.sapnhap.org
+cloudflared tunnel route dns <tunnel-name> sapnhap.thinhpxp.io.vn
+
+# Restart service cloudflared
 sudo systemctl restart cloudflared
 ```
 
 ---
 
-### Bước 10 — Kiểm tra toàn bộ hệ thống
+### Bước 10 — Kiểm tra Toàn bộ Dịch vụ
 
 ```bash
-# 1. Container đang chạy?
+# 1. Kiểm tra trạng thái Container Backend
 docker ps | grep sapnhap-api
 
-# 2. API hoạt động?
-curl "http://localhost:3000/health"
+# 2. Thử nghiệm gọi API qua cổng Backend (:3000)
 curl "http://localhost:3000/api/new-geo-data" | head -c 200
 curl "http://localhost:3000/api/lookup?code=10000&type=forward"
 
-# 3. Nginx proxy đúng không?
-curl http://localhost:8083/api/health
-curl http://localhost:8083/ -L | head -c 100
+# 3. Thử nghiệm Nginx proxy cổng nội bộ (:8083)
+curl -H "Host: sapnhap.thinhpxp.io.vn" http://127.0.0.1:8083/api/health
+curl -H "Host: sapnhap.thinhpxp.io.vn" http://127.0.0.1:8083/vi.html | head -c 100
 
-# 4. Valkey cache có dữ liệu chưa? (sau vài request)
+# 4. Kiểm tra dữ liệu được cache vào Valkey (DB 2)
 valkey-cli -n 2 keys "sapnhap:*"
 
-# 5. Kiểm tra log Nginx
-sudo tail -50 /var/log/nginx/access.log
+# 5. Truy cập tên miền chính thức trên trình duyệt
+# https://sapnhap.thinhpxp.io.vn
 ```
 
 ---
 
-## Quy trình cập nhật nhanh
+## Quy trình Cập nhật Nhanh khi có Mã nguồn Mới
 
-### Chỉ đổi Frontend (vi.html, script.js, blog/...)
-
+### Trường hợp 1 — Chỉ sửa đổi Frontend (HTML/CSS/JS, Bài viết blog)
 ```bash
-cd /opt/sapnhap && git pull
-sudo cp vi.html en.html script.js style.css /var/www/sapnhap/
-sudo cp -r locales/ blog/ assets/ /var/www/sapnhap/
-# Nginx phục vụ file mới ngay lập tức — không cần restart
+cd /opt/sapnhap && git pull origin fedora
+sudo cp -r /opt/sapnhap/frontend/* /var/www/sapnhap/
+sudo chown -R nginx:nginx /var/www/sapnhap
+# Không cần restart Nginx hay Docker — Nginx tự động phục vụ file mới ngay lập tức
 ```
 
-### Đổi Backend (server/*.ts)
-
+### Trường hợp 2 — Thay đổi Backend API (Mã nguồn `backend/`)
 ```bash
-cd /opt/sapnhap && git pull
-cd server && npm run build && cd ..
+cd /opt/sapnhap && git pull origin fedora
+cd backend && npm run build && cd ..
 docker build -t sapnhap-api:latest .
 sudo systemctl restart sapnhap-api
-docker logs sapnhap-api  # Kiểm tra khởi động OK
+docker logs -f sapnhap-api  # Theo dõi log xem có lỗi khởi động không
 ```
 
-### Đổi cấu hình Nginx
-
+### Trường hợp 3 — Thay đổi cấu hình Nginx
 ```bash
 sudo cp /opt/sapnhap/deploy/nginx/sapnhap.conf /etc/nginx/conf.d/
 sudo nginx -t && sudo nginx -s reload
@@ -597,15 +493,15 @@ sudo nginx -t && sudo nginx -s reload
 
 ---
 
-## Checklist — Setup lần đầu
+## Checklist Nhanh khi Triển khai Lần đầu
 
-- [ ] **Bước 1** Tạo user và DB PostgreSQL + ALTER ROLE limits
-- [ ] **Bước 2** Cấu hình `pg_hba.conf` + Firewall rule cho Docker
-- [ ] **Bước 3** Import `schema.sql` → `indexes.sql` → dữ liệu từ Supabase
-- [ ] **Bước 4** Tạo `/etc/sapnhap/.env` với đầy đủ thông tin thật
-- [ ] **Bước 5** Build TypeScript (`npm run build`) + Docker image
-- [ ] **Bước 6** Cài đặt systemd service và kích hoạt timer
-- [ ] **Bước 7** Copy frontend vào `/var/www/sapnhap/` + phân quyền
-- [ ] **Bước 8** Copy Nginx config + SELinux + nginx reload
-- [ ] **Bước 9** Cập nhật Cloudflare Tunnel config + DNS
-- [ ] **Bước 10** Kiểm tra toàn bộ endpoints
+- [ ] **Bước 1** Tạo user `sapnhap_api` và database `sapnhap` trên PostgreSQL
+- [ ] **Bước 2** Cấu hình `pg_hba.conf` + mở cổng Firewalld cho dải `172.17.0.0/16`
+- [ ] **Bước 3** Import `schema.sql` → `indexes.sql` → `sapnhap_data_export.sql`
+- [ ] **Bước 4** Tạo tệp `/etc/sapnhap/.env` và phân quyền `600`
+- [ ] **Bước 5** Biên dịch Backend (`cd backend && npm run build`) + build Docker image `sapnhap-api:latest`
+- [ ] **Bước 6** Cài đặt script `docker-run.sh` và kích hoạt Systemd service & timer
+- [ ] **Bước 7** Copy nội dung `frontend/*` vào `/var/www/sapnhap/` và phân quyền `nginx:nginx`
+- [ ] **Bước 8** Copy `sapnhap.conf` vào Nginx + bật SELinux boolean `httpd_read_user_content` & `httpd_can_network_connect`
+- [ ] **Bước 9** Thêm hostname `sapnhap.thinhpxp.io.vn` vào Cloudflare Tunnel config & đăng ký DNS
+- [ ] **Bước 10** Truy cập `https://sapnhap.thinhpxp.io.vn` kiểm tra giao diện và thử tra cứu địa danh
