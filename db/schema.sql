@@ -1,99 +1,101 @@
--- PostgreSQL Schema DDL for sapnhap.org (Replacing Supabase)
+-- PostgreSQL Schema DDL for sapnhap.org (Chính xác 100% theo Supabase CSDL thực tế)
 
-CREATE TABLE IF NOT EXISTS merger_events (
-    id SERIAL PRIMARY KEY,
-    old_ward_code INT NOT NULL,
-    old_ward_name VARCHAR(255) NOT NULL,
-    old_ward_en_name VARCHAR(255),
-    old_district_code INT,
-    old_district_name VARCHAR(255),
-    old_district_en_name VARCHAR(255),
+DROP TABLE IF EXISTS merger_events CASCADE;
+DROP TABLE IF EXISTS village_changes CASCADE;
+DROP TABLE IF EXISTS old_wards CASCADE;
+DROP TABLE IF EXISTS new_wards CASCADE;
+DROP TABLE IF EXISTS ward_admin_centers CASCADE;
+DROP TABLE IF EXISTS province_admin_centers CASCADE;
+DROP TABLE IF EXISTS province_mergers CASCADE;
+DROP TABLE IF EXISTS old_data_flat CASCADE;
+DROP TABLE IF EXISTS feedback CASCADE;
+
+CREATE TABLE merger_events (
+    id INT PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     old_province_code INT,
-    old_province_name VARCHAR(255),
-    old_province_en_name VARCHAR(255),
-    new_ward_code INT NOT NULL,
-    new_ward_name VARCHAR(255) NOT NULL,
-    new_ward_en_name VARCHAR(255),
-    new_district_code INT,
-    new_district_name VARCHAR(255),
-    new_district_en_name VARCHAR(255),
+    old_province_name TEXT,
+    old_province_en_name TEXT,
+    old_district_code INT,
+    old_district_name TEXT,
+    old_district_en_name TEXT,
+    old_ward_code INT,
+    old_ward_name TEXT,
+    old_ward_en_name TEXT,
     new_province_code INT,
-    new_province_name VARCHAR(255),
-    new_province_en_name VARCHAR(255),
-    effective_date DATE,
-    resolution_number VARCHAR(100),
-    notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS village_changes (
-    id SERIAL PRIMARY KEY,
-    old_ward_code INT NOT NULL,
-    old_village_name VARCHAR(255) NOT NULL,
-    new_village_name VARCHAR(255),
+    new_province_name TEXT,
+    new_province_en_name TEXT,
     new_ward_code INT,
-    new_ward_name VARCHAR(255),
+    new_ward_name TEXT,
+    new_ward_en_name TEXT,
+    event_type TEXT,
+    split_description TEXT,
+    change_date DATE
+);
+
+CREATE TABLE village_changes (
+    id BIGINT PRIMARY KEY,
+    old_village_name TEXT,
+    status TEXT,
+    new_village_name TEXT,
+    old_ward_code INT,
+    new_ward_code INT,
     notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    old_ward_name TEXT,
+    new_ward_name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS old_wards (
-    id SERIAL PRIMARY KEY,
-    old_ward_code INT UNIQUE NOT NULL,
-    old_ward_name VARCHAR(255) NOT NULL,
-    old_district_name VARCHAR(255),
-    old_province_name VARCHAR(255),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE old_wards (
+    old_ward_code INT PRIMARY KEY,
+    old_ward_name TEXT,
+    old_ward_en_name TEXT,
+    old_district_name TEXT,
+    old_province_name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS new_wards (
-    id SERIAL PRIMARY KEY,
-    new_ward_code INT UNIQUE NOT NULL,
-    new_ward_name VARCHAR(255) NOT NULL,
-    new_district_name VARCHAR(255),
-    new_province_name VARCHAR(255),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE new_wards (
+    new_ward_code INT PRIMARY KEY,
+    new_ward_name TEXT,
+    new_ward_en_name TEXT,
+    new_province_name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS ward_admin_centers (
-    id SERIAL PRIMARY KEY,
-    new_ward_code INT NOT NULL,
-    agency_type VARCHAR(255) NOT NULL,
-    address TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE ward_admin_centers (
+    id BIGINT PRIMARY KEY,
+    new_ward_code INT,
+    agency_type TEXT,
+    address TEXT
 );
 
-CREATE TABLE IF NOT EXISTS province_admin_centers (
-    id SERIAL PRIMARY KEY,
-    new_province_code INT NOT NULL,
-    agency_type VARCHAR(255) NOT NULL,
-    address TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE province_admin_centers (
+    id INT PRIMARY KEY,
+    new_province_code SMALLINT,
+    agency_type TEXT,
+    address TEXT
 );
 
-CREATE TABLE IF NOT EXISTS province_mergers (
-    id SERIAL PRIMARY KEY,
-    old_province_code INT NOT NULL,
-    old_province_name VARCHAR(255) NOT NULL,
-    new_province_code INT NOT NULL,
-    new_province_name VARCHAR(255) NOT NULL,
-    resolution_number VARCHAR(100),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE province_mergers (
+    id INT PRIMARY KEY,
+    new_province_code INT,
+    new_province_name TEXT,
+    old_province_name TEXT,
+    old_province_code INT
 );
 
-CREATE TABLE IF NOT EXISTS old_data_flat (
-    id SERIAL PRIMARY KEY,
-    province_name VARCHAR(255),
-    district_name VARCHAR(255),
-    ward_name VARCHAR(255),
-    ward_code INT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE old_data_flat (
+    id INT PRIMARY KEY,
+    old_province_code INT,
+    old_province_name TEXT,
+    district_code INT,
+    old_district_name TEXT,
+    old_ward_code INT,
+    old_ward_name TEXT
 );
 
-CREATE TABLE IF NOT EXISTS feedback (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE feedback (
+    id INT PRIMARY KEY,
     message TEXT NOT NULL,
-    context JSONB,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     is_sent_to_telegram BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    context JSONB
 );
