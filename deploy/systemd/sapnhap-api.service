@@ -1,0 +1,16 @@
+[Unit]
+Description=Sapnhap API Docker Container
+After=network.target docker.service postgresql-16.service valkey.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/bin/docker stop sapnhap-api
+ExecStartPre=-/usr/bin/docker rm sapnhap-api
+ExecStart=/usr/local/bin/docker-run.sh
+ExecStop=/usr/bin/docker stop sapnhap-api
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

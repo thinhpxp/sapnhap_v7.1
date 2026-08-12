@@ -58,56 +58,494 @@ Nginx Host (:8083) — Reverse Proxy
 
 ## Giải pháp bảo mật và chống DDoS (Lượng truy cập lớn ~2000 CCU)
 
-Với đặc thù hệ thống công cộng không đăng nhập, có nhiều form/input, nguy cơ bị spam (feedback, bot cào dữ liệu) hoặc DDoS làm sập PostgreSQL/Valkey là rất lớn. Chúng ta áp dụng giải pháp bảo mật **4 lớp** đồng bộ:
+Với đặc thù hệ thống công cộng không đăng nhập, có nhiều dropdown cascade và nút tra cứu công khai, nguy cơ bị volumetric flood, scraping bot, Slowloris, và spam feedback là rất cao. Chúng ta áp dụng chiến lược **Defense in Depth — 6 lớp phòng thủ theo chiều sâu**.
 
-### Lớp 1: Cấu hình Cloudflare WAF & Cache Rule (Quan trọng nhất)
-Vì server nằm sau Cloudflare Tunnel, ta có thể chặn đứng 90% các cuộc tấn công ngay tại Edge Network của Cloudflare trước khi nó tiếp cận máy chủ Fedora của bạn:
-1. **Cloudflare Cache Rules cho API**:
-   - Dữ liệu sáp nhập địa giới hành chính (2023-2025) là dữ liệu lịch sử tĩnh, **không bao giờ thay đổi**.
-   - Cấu hình Cache Rule trên Cloudflare Dashboard: Cache toàn bộ các request `GET /api/lookup?*` và `GET /api/new-geo-data?*` với TTL **7 ngày** ở Edge.
-   - Khi có luồng truy cập lớn vào cùng một địa phương (ví dụ: link chia sẻ MXH), **99.9% request sẽ được trả về trực tiếp từ Edge CDN của Cloudflare**, tải của máy chủ Fedora lúc này bằng 0.
-2. **Cloudflare WAF / Rate Limiting**:
-   - Bật luật chặn nếu 1 IP gửi quá 5 request `/api/feedback` trong 1 phút.
-   - Bật Challenge (bắt xác thực trình duyệt) nếu 1 IP gửi quá 60 request tra cứu/tìm kiếm trong 1 phút.
-3. **Cloudflare Turnstile (Chống Spam Feedback)**:
-   - Tích hợp Cloudflare Turnstile widget (miễn phí, không làm phiền người dùng như CAPTCHA truyền thống) vào Form Góp ý.
-   - Backend Fastify sẽ kiểm chứng Turnstile token trước khi ghi nhận feedback và gửi tin nhắn Telegram. Ngăn chặn triệt để 100% các script spam tự động.
+> [!IMPORTANT]
+> Nguyên tắc: Chặn ở biên mạng (Cloudflare Edge) trước, rồi mới đến Nginx, Fastify, Database và cuối cùng là Frontend. Kẻ tấn công vượt qua được lớp ngoài mới mới tiếp cận lớp trong.
 
-### Lớp 2: Giới hạn tần suất (Rate Limiting) tại Nginx Host
-Phòng trường hợp bypass được Cloudflare hoặc bị scan cổng nội bộ:
-1. **nginx `limit_req_zone`**:
-   - Định nghĩa vùng giới hạn tần suất trong nginx:
-     ```nginx
-     # Trong nginx.conf hoặc sapnhap.conf
-     limit_req_zone $binary_remote_addr zone=feedback_limit:10m rate=12r/m; # Max 1 request/5s
-     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=5r/s;       # Max 5 requests/s
-     ```
-   - Áp dụng vào Nginx location proxy:
-     ```nginx
-     location /api/feedback {
-         limit_req zone=feedback_limit burst=3 nodelay;
-         proxy_pass http://127.0.0.1:3000;
-     }
-     location /api/ {
-         limit_req zone=api_limit burst=15 nodelay;
-         proxy_pass http://127.0.0.1:3000;
-     }
-     ```
-2. **Bảo vệ bằng tĩnh hóa (Static Offloading)**:
-   - Nginx phục vụ trực tiếp các file tĩnh (`vi.html`, `en.html`, `locales/`, `assets/`, `blog/`). Không cho các request này đi qua Node.js. Nginx xử lý tĩnh cực kỳ nhanh và tốn rất ít RAM, dễ dàng cân hơn 10.000 CCU.
+---
 
-### Lớp 3: Caching tại Fastify qua Valkey & Tối ưu Database
-1. **Valkey Key-Value Cache**:
-   - Mỗi truy vấn tra cứu (lookup) thành công sẽ được cache vào Valkey dưới dạng JSON string với key `sapnhap:lookup:forward:<ward_code>` và TTL **24 giờ**.
-   - Khi có request tới, Fastify check Valkey trước. Nếu có, trả về ngay lập tức (<1ms). Việc này giải phóng PostgreSQL hoàn toàn khỏi tải đọc lặp đi lặp lại.
-2. **PostgreSQL Connection Pool**:
-   - Đặt `max` connections của Postgres pool ở mức vừa phải (khoảng `30` connections). Giúp bảo vệ CPU của PostgreSQL không bị quá tải khi bị spam đột biến.
+### Lớp A — Cloudflare Edge (Hàng phòng thủ ngoài cùng)
 
-### Lớp 4: Cản lọc và Debounce tại Frontend Client
-1. **Debounce tìm kiếm nhanh (Quick Search)**:
-   - Sử dụng debounce **300ms** trên input. Nghĩa là chỉ gửi request lên API khi người dùng đã ngừng gõ phím được 300ms. Tránh việc người dùng gõ từ "Hà Nội" gửi đi 6-7 request API cùng lúc.
-2. **Tránh Double-click (Button Throttling)**:
-   - Vô hiệu hóa (disable) nút "Tra Cứu" và nút "Gửi Feedback" ngay sau khi click, chỉ kích hoạt lại sau 2 giây. Ngăn chặn người dùng bấm liên tục nhiều lần gửi trùng request.
+#### A1. Cache toàn bộ API read-only tại Edge CDN
+Đây là vũ khí mạnh nhất: nếu 99% traffic được trả về từ Edge CDN, DDoS volumetric hoàn toàn vô hiệu vì chưa chạm đến máy chủ Fedora.
+
+| Endpoint | Cache Rule | TTL Edge | Ghi chú |
+|---|---|---|---|
+| `GET /api/lookup?*` | Cache Everything | 7 ngày | Dữ liệu sáp nhập tĩnh |
+| `GET /api/new-geo-data?*` | Cache Everything | 7 ngày | Danh sách tỉnh/xã mới |
+| `GET /api/get-admin-centers?*` | Cache Everything | 7 ngày | Trung tâm hành chính |
+| `GET /api/get-old-data` | Cache Everything | 24 giờ | File dữ liệu lớn ~2.2MB |
+| `POST /api/feedback` | Bypass cache | — | Không cache POST |
+
+**Cấu hình trên Cloudflare Dashboard:**
+```
+Rules → Cache Rules → Create Rule:
+  If: URI Path starts with "/api/lookup" AND Request Method = GET
+  Then: Cache Status = Cache Everything, Edge TTL = 7 days, Browser TTL = 1 hour
+```
+
+#### A2. WAF Custom Rules — Chặn theo hành vi bất thường
+```
+# Rule 1: Chặn flood vào endpoint dropdown (scraper thường gọi new-geo-data lặp lại)
+  If: URI Path = "/api/new-geo-data" AND Rate > 20 req/min per IP → BLOCK
+
+# Rule 2: Rate limit feedback POST nghiêm ngặt
+  If: URI Path = "/api/feedback" AND Method = POST AND Rate > 5 req/min per IP → BLOCK (429)
+
+# Rule 3: Challenge bot khi sweep toàn bộ mã phường
+  If: URI Path contains "/api/lookup" AND Rate > 100 req/min per IP → Managed Challenge
+
+# Rule 4: Block known bad User-Agents (công cụ scan tự động)
+  If: User-Agent matches regex "(curl|python-requests|go-http|scrapy|wget)" → BLOCK
+```
+
+#### A3. Super Bot Fight Mode
+- Bật **Super Bot Fight Mode** (miễn phí trên Free plan): tự động nhận diện và challenge các bot dùng headless browser (Puppeteer, Playwright).
+- Xử lý kịch bản botnet nhiều IP khác nhau bypass per-IP rate limit — Bot Management phân tích hành vi thay vì chỉ dựa vào IP đơn lẻ.
+
+#### A4. Cloudflare Turnstile — Chống spam Form Feedback
+```html
+<!-- Frontend: thêm vào form feedback -->
+<div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY" data-theme="light"></div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+```
+
+```typescript
+// Backend Fastify: xác thực token trước khi INSERT
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      response: token,
+      remoteip: ip,
+    }),
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+```
+
+#### A5. IP Lists & Geo-blocking
+- Nếu phát hiện botnet từ datacenter/VPS range cụ thể: tạo IP List, áp WAF Rule block toàn bộ AS Number.
+- Ưu tiên giữ lại traffic Việt Nam (người dùng thực tế), challenge hoặc block range từ datacenter nước ngoài.
+
+---
+
+### Lớp B — Nginx Host (Phòng thủ thứ 2)
+
+Kẻ tấn công biết IP Fedora hoặc tìm cách bypass Cloudflare Tunnel — Nginx là tường lửa thứ 2.
+
+#### B1. Rate Limiting đa cấp bằng `limit_req_zone`
+```nginx
+# Định nghĩa zones — đặt ở http block trong nginx.conf
+limit_req_zone $binary_remote_addr zone=sapnhap_feedback:10m rate=6r/m;   # feedback POST
+limit_req_zone $binary_remote_addr zone=sapnhap_api:20m    rate=10r/s;    # lookup/search
+limit_req_zone $binary_remote_addr zone=sapnhap_dropdown:10m rate=2r/s;   # dropdown data
+
+server {
+    location /api/feedback {
+        limit_req zone=sapnhap_feedback burst=2 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3000;
+    }
+    location ~* ^/api/(new-geo-data|get-old-data|get-admin-centers) {
+        limit_req zone=sapnhap_dropdown burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3000;
+    }
+    location /api/ {
+        limit_req zone=sapnhap_api burst=20 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3000;
+    }
+}
+```
+
+#### B2. Giới hạn kết nối đồng thời (`limit_conn`) — chống Connection Flood
+```nginx
+limit_conn_zone $binary_remote_addr zone=sapnhap_conn:10m;
+
+server {
+    limit_conn sapnhap_conn 20;   # Tối đa 20 kết nối TCP đồng thời per IP
+    limit_conn_status 429;
+}
+```
+
+#### B3. Chống Slowloris (giữ kết nối chậm làm cạn thread)
+```nginx
+server {
+    client_body_timeout    10s;   # Kill nếu body gửi quá chậm
+    client_header_timeout  10s;   # Kill nếu header chưa xong sau 10s
+    keepalive_timeout      30s;   # Đóng keepalive sau 30s không có request mới
+    send_timeout           10s;   # Timeout gửi response
+
+    client_max_body_size   16k;   # Chặn upload bomb vào /api/feedback (feedback chỉ ~1KB)
+}
+```
+
+#### B4. Ẩn thông tin server & chặn path vô nghĩa
+```nginx
+http {
+    server_tokens off;   # Ẩn phiên bản Nginx trong response header
+}
+
+server {
+    # Return 444 (đóng kết nối không gửi response) cho các path scan dò
+    location ~* \.(php|asp|aspx|jsp|cgi)$              { return 444; }
+    location ~* /(wp-admin|wp-login|phpmyadmin|xmlrpc) { return 444; }
+
+    # Chặn nếu Host header không hợp lệ
+    if ($host !~* ^(sapnhap\.org|www\.sapnhap\.org)$) { return 444; }
+}
+```
+
+#### B5. Static Offloading — Nginx phục vụ file tĩnh, không qua Node.js
+- Nginx phục vụ trực tiếp `vi.html`, `en.html`, `locales/`, `assets/`, `blog/`.
+- Nginx xử lý file tĩnh cực nhanh, dễ dàng chịu > 10.000 CCU mà không tốn tài nguyên Node.js.
+
+---
+
+### Lớp C — Fastify Application Layer (Rate Limit thông minh với Valkey)
+
+Cloudflare và Nginx rate-limit theo IP. Fastify bổ sung thêm rate-limit theo **hành vi** và bảo vệ chống scraping dropdown.
+
+#### C1. Plugin `@fastify/rate-limit` với Valkey store
+```typescript
+// server/index.ts
+import rateLimit from '@fastify/rate-limit';
+import { valkey } from './cache.js';
+
+await fastify.register(rateLimit, {
+  global: false,       // Áp per-route thay vì global
+  redis: valkey,       // Dùng Valkey làm store (đồng bộ nếu scale sau này)
+  keyGenerator: (req) =>
+    (req.headers['cf-connecting-ip'] as string) ?? req.ip,  // IP thực từ Cloudflare
+});
+```
+
+#### C2. Rate limit per-route cho endpoint nhạy cảm
+```typescript
+// Feedback — nghiêm ngặt nhất
+fastify.post('/api/feedback', {
+  config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+  handler: feedbackHandler,
+});
+
+// Lookup — vừa phải
+fastify.get('/api/lookup', {
+  config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
+  handler: lookupHandler,
+});
+
+// Quick Search — thoải mái hơn (đã có debounce 300ms ở FE)
+fastify.get('/api/quick-search', {
+  config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
+  handler: quickSearchHandler,
+});
+```
+
+#### C3. Anti-Scraping Middleware cho dropdown cascade
+Các endpoint dropdown (`/api/new-geo-data?province_code=X`) dễ bị lạm dụng để cào toàn bộ dữ liệu bằng cách duyệt qua mọi `province_code`. Sliding window counter phát hiện hành vi này:
+
+```typescript
+// server/middleware/anti-scrape.ts
+export async function antiScrapingMiddleware(req: FastifyRequest, reply: FastifyReply) {
+  const ip = (req.headers['cf-connecting-ip'] as string) ?? req.ip;
+
+  // Kiểm tra IP đang bị khóa
+  if (await valkey.get(`sapnhap:blocked:${ip}`)) {
+    return reply.status(429).send({ error: 'IP tạm thời bị giới hạn.' });
+  }
+
+  const provinceCode = (req.query as any).province_code;
+  if (provinceCode) {
+    const trackKey = `sapnhap:scrape:${ip}:provinces`;
+    await valkey.sadd(trackKey, provinceCode);
+    await valkey.expire(trackKey, 3600);   // Cửa sổ 1 giờ
+
+    const uniqueCount = await valkey.scard(trackKey);
+    if (uniqueCount > 30) {
+      // 1 IP duyệt > 30 tỉnh khác nhau trong 1 giờ → khóa 24h
+      await valkey.setex(`sapnhap:blocked:${ip}`, 86400, '1');
+      await sendTelegramAlert(`🤖 Scraper phát hiện: IP ${ip} đã query ${uniqueCount} tỉnh.`);
+      return reply.status(429).send({ error: 'Quá nhiều truy vấn tự động.' });
+    }
+  }
+}
+```
+
+#### C4. Circuit Breaker cho PostgreSQL — Tự ngắt khi DB quá tải
+```typescript
+// server/db.ts
+let consecutiveErrors = 0;
+const CIRCUIT_OPEN_THRESHOLD = 10;
+const CIRCUIT_RESET_MS = 30_000;
+let circuitOpenUntil = 0;
+
+export async function queryWithCircuitBreaker(sql: string, params: unknown[]) {
+  if (Date.now() < circuitOpenUntil) {
+    throw new Error('Database circuit open — từ chối request tạm thời');
+  }
+  try {
+    const result = await pool.query({ text: sql, values: params, query_timeout: 5000 });
+    consecutiveErrors = 0;
+    return result;
+  } catch (err) {
+    consecutiveErrors++;
+    if (consecutiveErrors >= CIRCUIT_OPEN_THRESHOLD) {
+      circuitOpenUntil = Date.now() + CIRCUIT_RESET_MS;
+      await sendTelegramAlert(`⚡ CircuitBreaker kích hoạt: PostgreSQL quá tải, ngắt 30s`);
+    }
+    throw err;
+  }
+}
+```
+
+#### C5. Connection Pool + Query Timeout tối ưu
+```typescript
+// server/db.ts
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 30,                       // Tối đa 30 connections (bảo vệ PostgreSQL)
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 2_000, // Fail nhanh nếu không lấy được conn sau 2s
+  statement_timeout: 5000,        // Tự hủy query chạy > 5 giây
+});
+```
+
+---
+
+### Lớp D — PostgreSQL & Valkey tự bảo vệ
+
+#### D1. Giới hạn connection từ role `sapnhap_api`
+```sql
+-- Chạy với quyền superuser trên PostgreSQL
+ALTER ROLE sapnhap_api CONNECTION LIMIT 35;
+-- Dù app bị lỗi tạo quá nhiều connection, DB vẫn không bị tràn
+```
+
+#### D2. Statement Timeout mặc định cho role
+```sql
+ALTER ROLE sapnhap_api SET statement_timeout = '5s';
+-- Mọi query từ sapnhap_api bị kill tự động nếu chạy > 5 giây
+```
+
+#### D3. Valkey memory limit & eviction policy
+```conf
+# /etc/valkey/valkey.conf
+maxmemory 512mb
+maxmemory-policy allkeys-lru  # Xóa key ít dùng nhất khi đầy bộ nhớ
+```
+
+> [!NOTE]
+> Vì Valkey dùng chung với draftinghub, cần đảm bảo tổng `maxmemory` đủ cho cả hai. Khuyến nghị đặt bằng 50% RAM thực của server.
+
+---
+
+### Lớp E — Frontend Defensive UX (Giảm tải chủ động từ client)
+
+Với hệ thống có nhiều dropdown cascade và nút tra cứu, frontend đóng vai trò quan trọng trong việc giảm số request đến API.
+
+#### E1. Debounce cho Search Input & Throttle cho nút Tra Cứu
+```javascript
+// utils/request-guard.js
+
+// Debounce: chỉ gửi sau khi người dùng dừng gõ N ms
+export function debounce(fn, delay = 300) {
+  let timer;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+}
+
+// Throttle: gửi tối đa 1 lần trong khoảng T ms, bỏ qua các lần sau
+export function throttle(fn, limit = 2000) {
+  let lastCall = 0;
+  return (...args) => {
+    const now = Date.now();
+    if (now - lastCall >= limit) { lastCall = now; return fn(...args); }
+  };
+}
+
+// Sử dụng:
+const debouncedSearch  = debounce(callSearchAPI, 300);   // Quick Search input
+const throttledLookup  = throttle(callLookupAPI, 2000);  // Nút Tra Cứu (tối đa 1 lần/2s)
+```
+
+#### E2. In-Memory Cache tại Browser — Tránh gọi lại API cho cùng tham số
+```javascript
+// utils/api-cache.js
+const _cache = new Map();
+
+export async function cachedFetch(url) {
+  if (_cache.has(url)) return _cache.get(url);
+
+  const res  = await fetch(url);
+  const data = await res.json();
+  _cache.set(url, data);
+
+  // Tự xóa sau 5 phút để tránh stale data
+  setTimeout(() => _cache.delete(url), 5 * 60 * 1000);
+  return data;
+}
+
+// Khi user chọn lại cùng 1 tỉnh → không gọi API mới
+const wardsData = await cachedFetch(`/api/new-geo-data?province_code=${selectedCode}`);
+```
+
+#### E3. Lazy Loading Dropdown — Không prefetch khi trang mở
+```javascript
+// CHỈ tải danh sách xã/phường khi user thực sự chọn tỉnh
+// KHÔNG load trước 64 tỉnh khi khởi động trang
+
+provinceSelect.addEventListener('change', async (e) => {
+  const code = e.target.value;
+  if (!code) return;
+
+  wardSelect.disabled = true;
+  wardSelect.innerHTML = '<option>Đang tải...</option>';
+  try {
+    const wards = await cachedFetch(`/api/new-geo-data?province_code=${code}`);
+    populateSelect(wardSelect, wards);
+  } finally {
+    wardSelect.disabled = false;
+  }
+});
+// → Thay vì 64 request khi trang mở, chỉ gọi API khi thực sự cần
+```
+
+#### E4. Loading Guard — Chặn double-submit
+```javascript
+function withLoadingGuard(buttonEl, asyncFn) {
+  return async (...args) => {
+    if (buttonEl.disabled) return;     // Chặn nếu đang xử lý
+    buttonEl.disabled = true;
+    const original = buttonEl.textContent;
+    buttonEl.textContent = 'Đang xử lý...';
+    try {
+      await asyncFn(...args);
+    } finally {
+      setTimeout(() => {
+        buttonEl.disabled = false;
+        buttonEl.textContent = original;
+      }, 2000);  // Kích hoạt lại sau 2 giây
+    }
+  };
+}
+```
+
+#### E5. Exponential Backoff khi retry — Tránh làm nặng thêm server đang quá tải
+```javascript
+export async function fetchWithBackoff(url, options = {}, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, options);
+
+    if (res.status === 429 || res.status === 503) {
+      // Tăng thời gian chờ theo lũy thừa: 1s, 2s, 4s + jitter ngẫu nhiên
+      const delay = Math.min(1000 * 2 ** attempt + Math.random() * 500, 30_000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      continue;
+    }
+    return res;
+  }
+  throw new Error('Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.');
+}
+```
+
+---
+
+### Lớp F — Giám sát & Phản ứng nhanh
+
+#### F1. Cảnh báo Telegram realtime
+```typescript
+// server/utils/alert.ts
+export async function sendTelegramAlert(message: string) {
+  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: process.env.TELEGRAM_CHAT_ID,
+      text: `🚨 [sapnhap.org] ${message}`,
+    }),
+  });
+}
+// Kích hoạt khi: Circuit Breaker mở, scraper bị block, Valkey memory > 80%
+```
+
+#### F2. Nginx access log có format chi tiết để phân tích
+```nginx
+log_format sapnhap_detailed '$remote_addr [$time_local] '
+  '"$request" $status $body_bytes_sent '
+  '"$http_cf_connecting_ip" "$http_cf_ray" '
+  '$request_time upstream=$upstream_response_time';
+
+access_log /var/log/nginx/sapnhap_access.log sapnhap_detailed;
+```
+
+```bash
+# Top IP gửi nhiều request nhất trong log hiện tại
+awk '{print $1}' /var/log/nginx/sapnhap_access.log | sort | uniq -c | sort -rn | head -20
+
+# Tổng số lần bị rate limit (429)
+grep ' 429 ' /var/log/nginx/sapnhap_access.log | wc -l
+```
+
+#### F3. Bảng ngưỡng cảnh báo
+| Chỉ số | Ngưỡng | Hành động |
+|---|---|---|
+| PostgreSQL Circuit Breaker kích hoạt | 1 lần | Telegram alert, tự hồi phục sau 30s |
+| 1 IP bị rate-limit > 10 lần/giờ | 10 lần | Telegram alert, xem xét block thủ công trên CF |
+| Valkey memory > 80% maxmemory | 80% | Telegram alert, tăng maxmemory |
+| Nginx trả về 429 > 1.000/phút | 1.000 | Telegram alert, bật Under Attack Mode trên CF |
+| Anti-scrape block > 5 IP/giờ | 5 IP | Telegram alert, bật WAF Rule chặt hơn |
+
+---
+
+### Tóm tắt kiến trúc phòng thủ 6 lớp
+
+```
+INTERNET
+    │
+    ▼ [Lớp A] Cloudflare Edge
+    │  ├── Cache CDN (99% GET không chạm server)
+    │  ├── WAF Custom Rules (block/challenge theo hành vi)
+    │  ├── Super Bot Fight Mode (headless browser detection)
+    │  ├── Turnstile (form feedback anti-spam)
+    │  └── IP Lists & Geo-blocking
+    │
+    ▼ [Lớp B] Nginx Host (:8083)
+    │  ├── limit_req_zone (rate limit per IP per endpoint)
+    │  ├── limit_conn (max concurrent TCP connections per IP)
+    │  ├── client_body/header_timeout (chống Slowloris)
+    │  ├── Static offloading (file tĩnh không qua Node.js)
+    │  └── Return 444 cho path vô nghĩa / Host không hợp lệ
+    │
+    ▼ [Lớp C] Fastify Application
+    │  ├── @fastify/rate-limit + Valkey store (per-route)
+    │  ├── Anti-scraping middleware (sliding window + block IP)
+    │  ├── Circuit Breaker PostgreSQL (tự ngắt khi DB quá tải)
+    │  ├── Turnstile token verification
+    │  └── Connection pool + query timeout
+    │
+    ▼ [Lớp D] PostgreSQL & Valkey
+    │  ├── CONNECTION LIMIT per role (ALTER ROLE)
+    │  ├── statement_timeout per role
+    │  └── maxmemory + LRU eviction (Valkey)
+    │
+    ▼ [Lớp E] Frontend Client
+    │  ├── Debounce 300ms (search input)
+    │  ├── Throttle 2s (nút Tra Cứu)
+    │  ├── In-memory cache (tránh gọi lại API cùng tham số)
+    │  ├── Lazy loading dropdown (chỉ gọi khi chọn tỉnh)
+    │  ├── Loading Guard (chặn double-submit)
+    │  └── Exponential Backoff khi retry
+    │
+    ▼ [Lớp F] Giám sát
+       ├── Telegram alert realtime (circuit breaker, scraper, rate limit spike)
+       ├── Nginx access log phân tích
+       └── Bảng ngưỡng cảnh báo
+```
 
 ---
 

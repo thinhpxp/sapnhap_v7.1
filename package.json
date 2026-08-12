@@ -1,7 +1,7 @@
 {
-  "name": "sapnhap_v4.0",
+  "name": "sapnhap",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sapnhap.org frontend and static site generator tools",
   "main": "choices.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,9 +11,6 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@google-analytics/data": "^5.2.0",
-    "@supabase/supabase-js": "^2.50.5",
-    "@vercel/analytics": "^1.5.0",
     "gray-matter": "^4.0.3",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1"
