@@ -256,16 +256,19 @@ scp db/schema.sql db/indexes.sql sapnhap_data_export.sql \
 
 ```bash
 # 1. Tạo 9 bảng DDL
-psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/schema.sql
+sudo -u postgres psql -d sapnhap -f /tmp/sapnhap_db/schema.sql
 
 # 2. Tạo Indexes và Full-text search pg_trgm
-psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/indexes.sql
+sudo -u postgres psql -d sapnhap -f /tmp/sapnhap_db/indexes.sql
 
 # 3. Import dữ liệu từ Supabase
-psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -f /tmp/sapnhap_db/sapnhap_data_export.sql
+sudo -u postgres psql -d sapnhap -f /tmp/sapnhap_db/sapnhap_data_export.sql
 
-# 4. Kiểm tra số lượng bản ghi
-psql -h 127.0.0.1 -U sapnhap_api -d sapnhap -c "
+# 4. Phân lại quyền sở hữu các bảng cho sapnhap_api
+sudo -u postgres psql -d sapnhap -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO sapnhap_api; GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO sapnhap_api;"
+
+# 5. Kiểm tra số lượng bản ghi
+sudo -u postgres psql -d sapnhap -c "
   SELECT 'merger_events' AS bang, COUNT(*) FROM merger_events
   UNION ALL SELECT 'village_changes', COUNT(*) FROM village_changes
   UNION ALL SELECT 'old_wards', COUNT(*) FROM old_wards
