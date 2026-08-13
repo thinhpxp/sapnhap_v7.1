@@ -405,11 +405,22 @@ sudo nginx -s reload
 
 #### Cấu hình SELinux (dành cho Fedora 44):
 
-```bash
-# Cho phép Nginx đọc nội dung web root
-sudo setsebool -P httpd_read_user_content 1
+> [!IMPORTANT]
+> Trên Fedora/RHEL với SELinux ở chế độ `Enforcing`, Nginx **không thể bind vào cổng tùy chỉnh** cho đến khi cổng đó được cấp phép tường minh qua `semanage`. Bỏ sót bước này sẽ gây lỗi `bind() failed (13: Permission denied)` và nginx không thể khởi động.
 
-# Cho phép Nginx proxy kết nối ra cổng nội bộ 3000
+```bash
+# Bước 8a — Cấp phép cổng Nginx tùy chỉnh cho SELinux (chỉ chạy 1 lần khi deploy lần đầu)
+# Cổng 8082: smartdraftinghub (nếu cùng máy chủ)
+sudo semanage port -a -t http_port_t -p tcp 8082
+# Cổng 8083: sapnhap
+sudo semanage port -a -t http_port_t -p tcp 8083
+
+# Kiểm tra cổng đã được thêm vào danh sách cho phép
+sudo semanage port -l | grep http_port_t
+# Phải thấy cả 8082 và 8083 trong kết quả
+
+# Bước 8b — SELinux boolean cho phép Nginx đọc web root và proxy nội bộ
+sudo setsebool -P httpd_read_user_content 1
 sudo setsebool -P httpd_can_network_connect 1
 ```
 
@@ -505,6 +516,6 @@ sudo nginx -t && sudo nginx -s reload
 - [ ] **Bước 5** Biên dịch Backend (`cd backend && npm run build`) + build Docker image `sapnhap-api:latest`
 - [ ] **Bước 6** Cài đặt script `docker-run.sh` và kích hoạt Systemd service & timer
 - [ ] **Bước 7** Copy nội dung `frontend/*` vào `/var/www/sapnhap/` và phân quyền `nginx:nginx`
-- [ ] **Bước 8** Copy `sapnhap.conf` vào Nginx + bật SELinux boolean `httpd_read_user_content` & `httpd_can_network_connect`
+- [ ] **Bước 8** Copy `sapnhap.conf` vào Nginx + cấp phép SELinux cho **cổng 8083** (`semanage port -a -t http_port_t -p tcp 8083`) + bật boolean `httpd_read_user_content` & `httpd_can_network_connect`
 - [ ] **Bước 9** Thêm hostname `sapnhap.thinhpxp.io.vn` vào Cloudflare Tunnel config & đăng ký DNS
 - [ ] **Bước 10** Truy cập `https://sapnhap.thinhpxp.io.vn` kiểm tra giao diện và thử tra cứu địa danh
