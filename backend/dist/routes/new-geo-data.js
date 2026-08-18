@@ -26,10 +26,13 @@ export async function newGeoDataRoute(fastify) {
                     return reply.send(cached);
                 }
                 const sql = `
-            SELECT DISTINCT new_ward_code, new_ward_name, new_ward_en_name
+            SELECT DISTINCT 
+              new_ward_code AS ward_code, 
+              new_ward_name AS name, 
+              new_ward_en_name AS en_name
             FROM merger_events
-            WHERE new_province_code = $1
-            ORDER BY new_ward_name ASC
+            WHERE new_province_code = $1 AND new_ward_code IS NOT NULL
+            ORDER BY name ASC
           `;
                 const res = await queryWithCircuitBreaker(sql, [provCodeNum]);
                 await setCached(cacheKey, res.rows, 86400); // Cache 24h
@@ -46,9 +49,13 @@ export async function newGeoDataRoute(fastify) {
                     return reply.send(cached);
                 }
                 const sql = `
-            SELECT DISTINCT new_province_code, new_province_name, new_province_en_name
+            SELECT DISTINCT 
+              new_province_code AS province_code, 
+              new_province_name AS name, 
+              new_province_en_name AS en_name
             FROM merger_events
-            ORDER BY new_province_name ASC
+            WHERE new_province_code IS NOT NULL
+            ORDER BY name ASC
           `;
                 const res = await queryWithCircuitBreaker(sql, []);
                 await setCached(cacheKey, res.rows, 86400); // Cache 24h

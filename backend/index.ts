@@ -37,10 +37,10 @@ await fastify.register(rateLimit, {
     req.ip,
 });
 
-// Health check endpoint
-fastify.get('/health', async () => {
-  return { status: 'ok', timestamp: new Date().toISOString() };
-});
+// Health check endpoints
+const healthHandler = async () => ({ status: 'ok', timestamp: new Date().toISOString() });
+fastify.get('/health', healthHandler);
+fastify.get('/api/health', healthHandler);
 
 // Register routes
 await fastify.register(lookupRoute);
