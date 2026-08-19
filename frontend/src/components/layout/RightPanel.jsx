@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Compass, Users, MousePointerClick } from 'lucide-react';
 import { ResultPanel } from '../lookup/ResultPanel.jsx';
 import { ZaloChatButton } from '../ui/ZaloChatButton.jsx';
+import { PromoBanner } from '../ui/PromoBanner.jsx';
 import { Modal } from '../ui/Modal.jsx';
 import { fetchAdminCenters, fetchGaStats } from '../../services/api.js';
 
@@ -192,9 +193,10 @@ export function RightPanel({ resultData, isLookingUp, t }) {
         </div>
       </div>
 
-      {/* Panel Footer — Nút Chat Zalo Hỗ Trợ */}
-      <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]">
-        <ZaloChatButton label={t('zaloContact', 'Liên hệ hỗ trợ qua Zalo - Phan Xuân Phước Thịnh')} />
+      {/* Panel Footer — Khu vực Liên kết Quảng cáo & Nút Chat Zalo Hỗ Trợ */}
+      <div className="panel-footer-container">
+        <PromoBanner />
+        <ZaloChatButton label={t('zaloContact', 'Liên hệ hỗ trợ qua Zalo')} />
       </div>
 
       {/* Modal Địa chỉ Trung tâm Hành chính */}

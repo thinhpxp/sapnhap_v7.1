@@ -92,7 +92,7 @@ export const en = {
   footerCopyright: 'Version 8.1 © 2026. Administrative unit merger database of Vietnam.',
 
   // Zalo
-  zaloContact: 'Contact support via Zalo - Phan Xuan Phuoc Thinh',
+  zaloContact: 'Contact support via Zalo',
 
   // Errors
   errorLoading: 'Error loading data. Please try again.',

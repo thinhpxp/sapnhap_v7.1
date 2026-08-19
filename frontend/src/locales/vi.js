@@ -93,7 +93,7 @@ export const vi = {
   footerCopyright: 'Phiên bản 8.1 © 2026. Dữ liệu sáp nhập đơn vị hành chính Việt Nam.',
 
   // Zalo
-  zaloContact: 'Liên hệ hỗ trợ qua Zalo - Phan Xuân Phước Thịnh',
+  zaloContact: 'Liên hệ hỗ trợ qua Zalo',
 
   // Lỗi chung
   errorLoading: 'Lỗi tải dữ liệu. Vui lòng thử lại.',

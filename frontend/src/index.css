@@ -327,23 +327,117 @@ h6 {
   color: var(--color-accent);
 }
 
+/* ===== PANEL FOOTER & PROMO BANNER ===== */
+.panel-footer-container {
+  padding: 14px 16px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .panel-footer-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.promo-banner-container {
+  flex: 1;
+  width: 100%;
+}
+
+.promo-banner-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.promo-link-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all var(--transition);
+  flex: 1;
+  min-width: 140px;
+}
+
+.promo-link-card:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-panel);
+}
+
+.promo-link-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.promo-link-content {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.promo-link-title {
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-link-domain {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+.promo-link-arrow {
+  margin-left: auto;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+  flex-shrink: 0;
+}
+
+.promo-link-card:hover .promo-link-arrow {
+  opacity: 1;
+}
+
 /* ===== ZALO CHAT BUTTON ===== */
 .zalo-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
+  gap: 8px;
+  padding: 10px 16px;
   background: #0068ff;
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   transition: all var(--transition);
-  width: 100%;
   justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .zalo-btn:hover {
