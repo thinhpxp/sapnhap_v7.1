@@ -1,5 +1,7 @@
 // @ts-ignore
 import { allProvincesData } from '../../data/old_data.js';
+import { encryptPayload } from '../utils/cipher.js';
+
 export async function getOldDataRoute(fastify) {
     fastify.get('/api/get-old-data', {
         config: {
@@ -11,11 +13,11 @@ export async function getOldDataRoute(fastify) {
     }, async (request, reply) => {
         try {
             reply.header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-            return reply.send(allProvincesData);
+            return reply.send(encryptPayload(allProvincesData));
         }
         catch (error) {
             request.log.error(error);
-            return reply.status(500).send({ error: 'Lỗi máy chủ khi lấy dữ liệu hành chính cũ.' });
+            return reply.status(500).send(encryptPayload({ error: 'Lỗi máy chủ khi lấy dữ liệu hành chính cũ.' }));
         }
     });
 }
