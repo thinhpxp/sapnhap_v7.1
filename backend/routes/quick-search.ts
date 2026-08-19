@@ -35,7 +35,7 @@ export async function quickSearchRoute(fastify: FastifyInstance) {
     }
 
     try {
-      let rows: any[] = [];
+      let formattedResults: Array<{ code: number; name: string; context: string }> = [];
       const searchTerm = `%${cleanTerm}%`;
 
       if (type === 'old') {
@@ -43,24 +43,38 @@ export async function quickSearchRoute(fastify: FastifyInstance) {
           SELECT old_ward_code, old_ward_name, old_district_name, old_province_name
           FROM old_wards
           WHERE old_ward_name ILIKE $1 OR old_district_name ILIKE $1 OR old_province_name ILIKE $1
+          ORDER BY 
+            CASE WHEN old_ward_name ILIKE $1 THEN 1 ELSE 2 END,
+            old_ward_name ASC
           LIMIT 20
         `;
         const res = await queryWithCircuitBreaker(sql, [searchTerm]);
-        rows = res.rows;
+        formattedResults = res.rows.map((r: any) => ({
+          code: r.old_ward_code,
+          name: r.old_ward_name,
+          context: `${r.old_district_name ? r.old_district_name + ', ' : ''}${r.old_province_name || ''}`,
+        }));
       } else {
         const sql = `
-          SELECT new_ward_code, new_ward_name, new_district_name, new_province_name
+          SELECT new_ward_code, new_ward_name, new_province_name
           FROM new_wards
-          WHERE new_ward_name ILIKE $1 OR new_district_name ILIKE $1 OR new_province_name ILIKE $1
+          WHERE new_ward_name ILIKE $1 OR new_province_name ILIKE $1
+          ORDER BY 
+            CASE WHEN new_ward_name ILIKE $1 THEN 1 ELSE 2 END,
+            new_ward_name ASC
           LIMIT 20
         `;
         const res = await queryWithCircuitBreaker(sql, [searchTerm]);
-        rows = res.rows;
+        formattedResults = res.rows.map((r: any) => ({
+          code: r.new_ward_code,
+          name: r.new_ward_name,
+          context: r.new_province_name || '',
+        }));
       }
 
-      await setCached(cacheKey, rows, 3600); // Cache 1 hour
+      await setCached(cacheKey, formattedResults, 3600); // Cache 1 hour
       reply.header('X-Cache', 'MISS');
-      return reply.send(rows);
+      return reply.send(formattedResults);
     } catch (error: any) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Lỗi máy chủ.' });

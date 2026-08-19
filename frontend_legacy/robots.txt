@@ -1,0 +1,20 @@
+# robots.txt for the Address Lookup Tool
+
+# Allow all major search engines
+User-agent: *
+Allow: /
+
+# Disallow indexing of script and style files (optional but good practice)
+Disallow: /script.js
+Disallow: /data/*
+Disallow: /api/*
+Disallow: /style.css
+Disallow: /choices.min.css
+Disallow: /choices.min.js
+Disallow: /locales/*
+Disallow: /vercel.json
+Disallow: /package.json
+Disallow: /package-lock.json
+
+# Location of the sitemap
+Sitemap: https://sapnhap.org/sitemap.xml; https://sapnhap.org/blog-sitemap.xml

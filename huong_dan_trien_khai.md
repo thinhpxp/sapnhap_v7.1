@@ -472,7 +472,8 @@ curl -H "Host: sapnhap.thinhpxp.io.vn" http://127.0.0.1:8083/api/health
 curl -H "Host: sapnhap.thinhpxp.io.vn" http://127.0.0.1:8083/vi.html | head -c 100
 
 # 4. Kiểm tra dữ liệu được cache vào Valkey (DB 2)
-valkey-cli -n 2 keys "sapnhap:*"
+# Thay <MatKhauValkey> bằng mật khẩu trong VALKEY_URL của /etc/sapnhap/.env
+valkey-cli --no-auth-warning -a <MatKhauValkey> -n 2 keys "sapnhap:*"
 
 # 5. Truy cập tên miền chính thức trên trình duyệt
 # https://sapnhap.thinhpxp.io.vn

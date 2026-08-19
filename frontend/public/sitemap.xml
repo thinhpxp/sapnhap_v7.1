@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap đa ngôn ngữ cho sapnhap.org
+  Sử dụng xmlns:xhtml để khai báo không gian tên cho các thẻ hreflang.
+  Mỗi URL sẽ có một bộ các thẻ <xhtml:link> để chỉ định các phiên bản ngôn ngữ khác.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+    <!-- === TRANG CHỦ (TRANG TRA CỨU CHÍNH) === -->
+
+    <!-- Phiên bản Tiếng Việt -->
+    <url>
+        <loc>https://sapnhap.org/vi</loc>
+        <lastmod>2025-07-11</lastmod> <!-- Cập nhật ngày tháng khi có thay đổi lớn -->
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="x-default"
+               href="https://sapnhap.org/vi"/>
+    </url>
+
+    <!-- Phiên bản Tiếng Anh -->
+    <url>
+        <loc>https://sapnhap.org/en</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="x-default"
+               href="https://sapnhap.org/vi"/>
+    </url>
+
+    <!-- === TRANG GIỚI THIỆU (ABOUT) === -->
+
+    <!-- Phiên bản Tiếng Việt -->
+    <url>
+        <loc>https://sapnhap.org/vi/about.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/about.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/about.html"/>
+    </url>
+
+    <!-- Phiên bản Tiếng Anh -->
+    <url>
+        <loc>https://sapnhap.org/en/about.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/about.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/about.html"/>
+    </url>
+
+    <!-- === TRANG LIÊN HỆ (CONTACT) === -->
+
+    <!-- Phiên bản Tiếng Việt -->
+    <url>
+        <loc>https://sapnhap.org/vi/contact.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/contact.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/contact.html"/>
+    </url>
+
+    <!-- Phiên bản Tiếng Anh -->
+    <url>
+        <loc>https://sapnhap.org/en/contact.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/contact.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/contact.html"/>
+    </url>
+
+   <!-- === TRANG CHÍNH SÁCH === -->
+
+    <!-- Phiên bản Tiếng Việt -->
+    <url>
+        <loc>https://sapnhap.org/vi/policies.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/policies.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/policies.html"/>
+    </url>
+
+    <!-- Phiên bản Tiếng Anh -->
+    <url>
+        <loc>https://sapnhap.org/en/policies.html</loc>
+        <lastmod>2025-07-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/vi/policies.html"/>
+        <xhtml:link
+               rel="alternate"
+               hreflang="en-US"
+               href="https://sapnhap.org/en/policies.html"/>
+    </url>
+
+     <!-- === TRANG BLOG === -->
+
+    <!-- Phiên bản Tiếng Việt -->
+    <url>
+        <loc>https://sapnhap.org/blog</loc>
+        <lastmod>2025-09-29</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link
+               rel="alternate"
+               hreflang="vi-VN"
+               href="https://sapnhap.org/blog"/>
+    </url>
+
+</urlset>

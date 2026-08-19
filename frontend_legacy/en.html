@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-WFV4ML8F');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- === GOOGLE (SCHEMA.ORG) === -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Vietnam Administrative Unit Merger Lookup",
+      "url": "https://sapnhap.thinhpxp.io.vn/en"
+    }
+    </script>
+    <!-- ================= MULTI-LANGUAGE ================= -->
+    <title data-i18n-key="pageTitle">Vietnam Administrative Unit Merger Lookup 2025</title>
+    <meta name="description" data-i18n-key="pageDescription"
+        content="A fast, accurate lookup tool for merged and renamed commune-level administrative units in Vietnam (2023-2025).">
+    <link rel="canonical" href="https://sapnhap.thinhpxp.io.vn/en" />
+    <link rel="alternate" hreflang="vi-VN" href="https://sapnhap.thinhpxp.io.vn/vi" />
+    <link rel="alternate" hreflang="en-US" href="https://sapnhap.thinhpxp.io.vn/en" />
+    <link rel="alternate" hreflang="x-default" href="https://sapnhap.thinhpxp.io.vn/vi" />
+    <!-- ==================================================== -->
+    <!-- ================= (OPEN GRAPH) ================= -->
+    <meta property="og:title" content="Vietnam Administrative Unit Merger Lookup" />
+    <meta property="og:description"
+        content="Quickly look up information about merged or renamed wards, communes and towns in Vietnam (2023-2025)." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sapnhap.thinhpxp.io.vn/en" />
+    <meta property="og:image" content="https://sapnhap.thinhpxp.io.vn/assets/social-preview.png" />
+    <meta property="og:image:alt" content="Interface of the administrative unit lookup page" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="fb:app_id" content="1272895690870001" />
+    <!-- === X.COM (TWITTER CARDS) === -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vietnam Administrative Unit Merger Lookup">
+    <meta name="twitter:description"
+        content="A quick and accurate tool to look up merged and renamed commune-level administrative units in Vietnam.">
+    <meta name="twitter:image" content="https://sapnhap.thinhpxp.io.vn/assets/social-preview.png">
+    <meta name="twitter:image:alt" content="Interface of the administrative unit lookup page">
+    <meta name="twitter:site" content="@thinhpxp">
+    <!-- === FAVICON === -->
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+    <!-- === CSS === -->
+    <link rel="stylesheet" href="/choices.min.css" />
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WFV4ML8F" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container">
+        <!-- Left column -->
+        <div class="left-column">
+            <div class="left-column-content-wrapper">
+                <h1 data-i18n-key="mainHeading">Merger Address Lookup - v4</h1>
+                <!-- === LANGUAGE SWITCHER === -->
+                <div class="language-switcher">
+                    <a href="/vi" class="eng" style="font-size: 0.8em; color: #054b6c;">Tiếng Việt</a> | <a
+                        class="active" href="/en" style="color: #f54d4d; font-size: 0.8em;">English</a>
+                </div>
+                <!-- ====== -->
+                <div class="head-lookup-description" id="lookup-description" data-i18n-key="lookupDescriptionOldToNew">
+                    Select an old address to find the corresponding new administrative unit.</div>
+                <div class="header-bar">
+                    <div id="traditional-mode-switcher" class="lookup-mode-container">
+                        <span class="mode-label" data-i18n-key="oldToNew">Old → New</span>
+                        <label class="switch">
+                            <input type="checkbox" id="mode-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="mode-label" data-i18n-key="newToOld">New → Old</span>
+                    </div>
+                    <div class="quick-search-toggle-container">
+                        <span class="mode-label" data-i18n-key="traditionalLookup">Quick search</span>
+                        <label class="switch">
+                            <input type="checkbox" id="interface-mode-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="accent-toggle-container" class="accent-toggle-container hidden">
+                    <span class="accent-mode-label" data-i18n-key="withAccents">With Accents</span>
+                    <label class="switch"> <!-- keep shared switch structure -->
+                        <input type="checkbox" id="accent-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="accent-mode-label" data-i18n-key="withoutAccents">Without Accents</span>
+                </div>
+                <!-- ======================================= -->
+                <div id="controls">
+                    <!-- === FORWARD LOOKUP (OLD -> NEW) === -->
+                    <div id="forward-controls">
+                        <div class="form-group">
+                            <label for="province-select" data-i18n-key="oldProvinceLabel">Province / City (Old)</label>
+                            <select id="province-select" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="district-select" data-i18n-key="oldDistrictLabel">District / County
+                                (Old)</label>
+                            <select id="district-select" class="form-control" disabled></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="commune-select" data-i18n-key="oldCommuneLabel">Commune / Ward (Old)</label>
+                            <select id="commune-select" class="form-control" disabled></select>
+                        </div>
+                    </div>
+                    <!-- === REVERSE LOOKUP (NEW -> OLD) === -->
+                    <div id="reverse-controls" class="hidden">
+                        <div class="form-group">
+                            <label for="new-province-select" data-i18n-key="newProvinceLabel">Province / City
+                                (New)</label>
+                            <select id="new-province-select" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-commune-select" data-i18n-key="newCommuneLabel">Commune / Ward / Town
+                                (New)</label>
+                            <select id="new-commune-select" class="form-control" disabled></select>
+                        </div>
+                    </div>
+                    <button id="lookup-btn" disabled data-i18n-key="lookupButton">Look Up</button>
+                </div>
+                <!--- DẪN ĐẾN TRANG BLOG -->
+                <div id="blog-container" class="blog-link-container">
+                    <a href="/blog/cac-tinh-thanh-pho-viet-nam" target="_blank" class="blog-link"
+                        data-i18n-key="blogLinkText">Read our blog for more information about the mergers.</a>
+                </div>
+                <!-- ======================================= -->
+                <!-- === QUICK SEARCH INTERFACE (hidden by default) === -->
+                <div id="quick-search-interface" class="hidden">
+
+                    <!-- Old address quick search -->
+                    <div class="quick-search-group">
+                        <label for="quick-search-old-input" data-i18n-key="quickSearchOldLabel">Search by old address
+                            name</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="quick-search-old-input" class="quick-search-input"
+                                data-i18n-placeholder="quickSearchOldPlaceholder"
+                                placeholder="Type old commune/ward name...">
+                            <div class="spinner-inline hidden"></div>
+                        </div>
+                        <ul id="quick-search-old-results" class="quick-search-results"></ul>
+                    </div>
+
+                    <!-- New address quick search -->
+                    <div class="quick-search-group">
+                        <label for="quick-search-new-input" data-i18n-key="quickSearchNewLabel">Search by new address
+                            name</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="quick-search-new-input" class="quick-search-input"
+                                data-i18n-placeholder="quickSearchNewPlaceholder"
+                                placeholder="Type new commune/ward name...">
+                            <div class="spinner-inline hidden"></div>
+                        </div>
+                        <ul id="quick-search-new-results" class="quick-search-results"></ul>
+                    </div>
+                </div>
+                <!-- RESULT PANEL (moved to right column; removed duplicate here) -->
+                <!-- original duplicate #result-container removed to avoid DOM duplication -->
+            </div>
+        </div>
+        <div class="right-column">
+            <!-- Initial info box -->
+            <div id="initial-instruction" class="instruction-box">
+                <h2 class="right-title">DON'T WORRY</h2>
+                <p class="right-text">As of July 1, 2025, Vietnam has merged many provinces and cities. Smaller
+                    administrative units within them have also been consolidated. Consequently, many familiar old
+                    addresses have disappeared, replaced by new and unfamiliar place names.</p>
+                <p class="right-text">This tool helps you quickly find the new names corresponding to old addresses (and
+                    vice versa). Simply select or search for the old address to see its updated name and details.</p>
+                <div class="social-icons">
+                    <a hreflang="email" href="mailto:thinhpxp@gmail.com" target="_blank">
+                        <i class="fas fa-envelope"></i> thinhpxp@gmail.com
+                    </a>
+                    <a href="phone" target="_blank">
+                        <i class="fas fa-phone"></i> +84 0935 691 563
+                    </a>
+                    <a href="https://www.facebook.com/thinhpxp" target="_blank">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://x.com/thinhpxp" target="_blank">
+                        <i class="fab fa-x-twitter"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/thinhpxp/" target="_blank">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Result display and QR/info split -->
+            <div id="result-container" class="hidden">
+                <h2 data-i18n-key="resultsTitle">Lookup Results</h2>
+                <div id="result-content">
+                    <div id="old-address-display"></div>
+                    <hr class="result-divider">
+                    <div id="new-address-display"></div>
+                </div>
+                <div id="admin-center-actions" class="hidden">
+                    <button id="show-admin-centers-btn" data-i18n-key="showAdminCentersBtn">View Administrative
+                        Centers</button>
+                </div>
+            </div>
+            <div class="top-right-split">
+                <!-- GOOGLE REAL TIME -->
+                <div id="realtime-users-container">
+                    <div id="google-analytics-header">
+                        <span id="realtime-total-users" style="font-size: 0.9em;font-weight: 600;"></span> / <span
+                            id="event-counter" style="font-size: 0.9em;font-weight: 600;"></span>
+                    </div>
+                    <ul id="realtime-locations-list"> <!-- Data filled by JS --> </ul>
+                </div>
+                <!-- SUPPORT / QR INFO -->
+                <div class="bottom-info-section">
+                    <div class="qr-column">
+                        <p class="qr-caption">Sharing this project with friends.</p>
+                    </div>
+                    <!-- Social share buttons -->
+                    <div class="social-share-container">
+                        <div class="sharing-descrtiption">Share with friends</div>
+                        <div class="share-buttons">
+                            <a href="#" id="share-facebook" class="share-btn facebook" aria-label="Share on Facebook">
+                                <!-- SVG icon kept from original -->
+                                <svg fill="#3239fb" height="24px" width="24px" viewBox="-337 273 123.5 256"
+                                    stroke="#3239fb">
+                                    <path
+                                        d="M-260.9,327.8c0-10.3,9.2-14,19.5-14c10.3,0,21.3,3.2,21.3,3.2l6.6-39.2c0,0-14-4.8-47.4-4.8c-20.5,0-32.4,7.8-41.1,19.3 c-8.2,10.9-8.5,28.4-8.5,39.7v25.7H-337V396h26.5v133h49.6V396h39.3l2.9-38.3h-42.2V327.8z">
+                                    </path>
+                                </svg>
+                            </a>
+                            <a href="#" id="share-x" class="share-btn x" aria-label="Share on X">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 16 16" height="24"
+                                    width="24">
+                                    <path
+                                        d="M12.6 0.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867 -5.07 -4.425 5.07H0.316l5.733 -6.57L0 0.75h5.063l3.495 4.633L12.601 0.75Zm-0.86 13.028h1.36L4.323 2.145H2.865z"
+                                        stroke-width="1"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- MYSTERY BOX (removed) -->
+        <!-- original mystery-box-container block removed as requested -->
+    </div>
+    </div>
+    <!-- MODAL FOR ADMIN CENTERS -->
+    <div id="admin-center-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close">&times;</button>
+            <h3 data-i18n-key="modalTitle">Administrative Centers Addresses</h3>
+            <div id="modal-body">
+                <!-- Content filled by JavaScript -->
+            </div>
+        </div>
+    </div>
+    <!-- ======================================================= -->
+    <footer>
+        <a href="/en" data-i18n-key="footerHome">Home</a> | <a href="/en/about.html"
+            data-i18n-key="footerAbout">About</a> | <a href="/en/contact.html" data-i18n-key="footerContact">Contact</a>
+        | <a href="/en/policies.html" data-i18n-key="footerPolicies">Policies</a>
+        <p>Version 7.0 © 2025</p>
+    </footer>
+    <script src="/choices.min.js" defer></script>
+    <script src="/locales/en.js" defer></script> <!-- Load English locale file -->
+    <script src="/script.js" defer></script>
+    <!-- === V_ANALYTICS === -->
+    <script>
+        window.va = window.va || function () { (window.va.q = window.va.q || []).push(arguments); };
+    </script>
+    <script src="/_vercel/insights/script.js" defer></script>
+    <!-- ============================ -->
+</body>
+
+</html>

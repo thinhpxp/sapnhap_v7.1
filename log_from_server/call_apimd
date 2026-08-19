@@ -1,0 +1,29 @@
+thinhpxp@192:~$ curl -v -H "Host: sapnhap.thinhpxp.io.vn" "http://127.0.0.1:8083/api/new-geo-data" 2>&1 | tail -30
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0*   Trying 127.0.0.1:8083...
+* Established connection to 127.0.0.1 (127.0.0.1 port 8083) from 127.0.0.1 port 34234 
+* using HTTP/1.x
+> GET /api/new-geo-data HTTP/1.1
+> Host: sapnhap.thinhpxp.io.vn
+> User-Agent: curl/8.18.0
+> Accept: */*
+> 
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Server: nginx/1.30.3
+< Date: Mon, 17 Aug 2026 13:33:24 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 3246
+< Connection: keep-alive
+< access-control-allow-origin: *
+< x-ratelimit-limit: 60
+< x-ratelimit-remaining: 58
+< x-ratelimit-reset: 4
+< x-cache: HIT
+< cache-control: public, max-age=86400, s-maxage=86400
+< 
+{ [3246 bytes data]
+100   3246 100   3246   0      0 531.3k      0                              0
+* Connection #0 to host 127.0.0.1:8083 left intact
+[{"new_province_code":91,"new_province_name":"An Giang","new_province_en_name":"An Giang"},{"new_province_code":24,"new_province_name":"Bắc Ninh","new_province_en_name":"Bac Ninh"},{"new_province_code":96,"new_province_name":"Cà Mau","new_province_en_name":"Ca Mau"},{"new_province_code":4,"new_province_name":"Cao Bằng","new_province_en_name":"Cao Bang"},{"new_province_code":66,"new_province_name":"Đắk Lắk","new_province_en_name":"Dak Lak"},{"new_province_code":11,"new_province_name":"Điện Biên","new_province_en_name":"Dien Bien"},{"new_province_code":75,"new_province_name":"Đồng Nai","new_province_en_name":"Dong Nai"},{"new_province_code":82,"new_province_name":"Đồng Tháp","new_province_en_name":"Dong Thap"},{"new_province_code":52,"new_province_name":"Gia Lai","new_province_en_name":"Gia Lai"},{"new_province_code":42,"new_province_name":"Hà Tĩnh","new_province_en_name":"Ha Tinh"},{"new_province_code":33,"new_province_name":"Hưng Yên","new_province_en_name":"Hung Yen"},{"new_province_code":56,"new_province_name":"Khánh Hòa","new_province_en_name":"Khanh Hoa"},{"new_province_code":12,"new_province_name":"Lai Châu","new_province_en_name":"Lai Chau"},{"new_province_code":68,"new_province_name":"Lâm Đồng","new_province_en_name":"Lam Dong"},{"new_province_code":20,"new_province_name":"Lạng Sơn","new_province_en_name":"Lang Son"},{"new_province_code":15,"new_province_name":"Lào Cai","new_province_en_name":"Lao Cai"},{"new_province_code":40,"new_province_name":"Nghệ An","new_province_en_name":"Nghe An"},{"new_province_code":37,"new_province_name":"Ninh Bình","new_province_en_name":"Ninh Binh"},{"new_province_code":25,"new_province_name":"Phú Thọ","new_province_en_name":"Phu Tho"},{"new_province_code":51,"new_province_name":"Quảng Ngãi","new_province_en_name":"Quang Ngai"},{"new_province_code":22,"new_province_name":"Quảng Ninh","new_province_en_name":"Quang Ninh"},{"new_province_code":44,"new_province_name":"Quảng Trị","new_province_en_name":"Quang Tri"},{"new_province_code":14,"new_province_name":"Sơn La","new_province_en_name":"Son La"},{"new_province_code":80,"new_province_name":"Tây Ninh","new_province_en_name":"Tay Ninh"},{"new_province_code":19,"new_province_name":"Thái Nguyên","new_province_en_name":"Thai Nguyen"},{"new_province_code":38,"new_province_name":"Thanh Hóa","new_province_en_name":"Thanh Hoa"},{"new_province_code":92,"new_province_name":"Thành phố Cần Thơ","new_province_en_name":"Can Tho city"},{"new_province_code":48,"new_province_name":"Thành phố Đà Nẵng","new_province_en_name":"Da Nang city"},{"new_province_code":31,"new_province_name":"Thành phố Hải Phòng","new_province_en_name":"Hai Phong city"},{"new_province_code":1,"new_province_name":"Thành phố Hà Nội","new_province_en_name":"Ha Noi city"},{"new_province_code":79,"new_province_name":"Thành phố Hồ Chí Minh","new_province_en_name":"Ho Chi Minh city"},{"new_province_code":46,"new_province_name":"Thành phố Huế","new_province_en_name":"Hue city"},{"new_province_code":8,"new_province_name":"Tuyên Quang","new_province_en_name":"Tuyen Quang"},{"new_province_code":86,"new_province_name":"Vĩnh Long","new_province_en_name":"Vinh Long"}]thinhpxp@192:~$ 

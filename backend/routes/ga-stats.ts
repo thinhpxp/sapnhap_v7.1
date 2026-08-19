@@ -18,8 +18,14 @@ const CLICK_EVENTS_TO_SUM = [
 
 function getAnalyticsClient(): BetaAnalyticsDataClient | null {
   try {
-    const credsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    let credsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON?.trim();
     if (!credsJson) return null;
+    if (
+      (credsJson.startsWith("'") && credsJson.endsWith("'")) ||
+      (credsJson.startsWith('"') && credsJson.endsWith('"'))
+    ) {
+      credsJson = credsJson.slice(1, -1).trim();
+    }
     const credentials = JSON.parse(credsJson);
     return new BetaAnalyticsDataClient({ credentials });
   } catch (error: any) {
