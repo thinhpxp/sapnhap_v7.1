@@ -3,19 +3,21 @@
 import { useState } from 'react';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
-export function VillageChangesTable({ villageChanges = [], title = 'Thay đổi cấp Thôn/Tổ dân phố:' }) {
+export function VillageChangesTable({ villageChanges = [], title }) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!villageChanges || villageChanges.length === 0) return null;
 
+  const displayTitle = title || 'Thay đổi cấp Thôn/Tổ dân phố:';
+
   return (
-    <div className="mt-4">
+    <div className="mt-2">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="village-toggle-btn"
       >
-        <span>{villageChanges.length} {title}</span>
+        <span>{displayTitle} ({villageChanges.length} thay đổi)</span>
         <ChevronDown
           size={16}
           className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}

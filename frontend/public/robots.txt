@@ -1,20 +1,13 @@
-# robots.txt for the Address Lookup Tool
-
-# Allow all major search engines
+# robots.txt cho ứng dụng Tra Cứu Sáp Nhập
 User-agent: *
 Allow: /
 
-# Disallow indexing of script and style files (optional but good practice)
-Disallow: /script.js
-Disallow: /data/*
+# Chặn crawl các file script, API và config nội bộ
 Disallow: /api/*
-Disallow: /style.css
-Disallow: /choices.min.css
-Disallow: /choices.min.js
-Disallow: /locales/*
 Disallow: /vercel.json
 Disallow: /package.json
 Disallow: /package-lock.json
 
-# Location of the sitemap
-Sitemap: https://sapnhap.org/sitemap.xml; https://sapnhap.org/blog-sitemap.xml
+# Đường dẫn sitemap chính xác cho Google Search Console
+Sitemap: https://sapnhap.thinhpxp.io.vn/sitemap.xml
+Sitemap: https://sapnhap.thinhpxp.io.vn/blog-sitemap.xml

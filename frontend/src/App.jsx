@@ -8,6 +8,7 @@ import { RightPanel } from './components/layout/RightPanel.jsx';
 import { Footer } from './components/layout/Footer.jsx';
 import { fetchOldData, fetchLookup } from './services/api.js';
 import { normalizeLookupResponse } from './utils/formatters.js';
+import { trackEvent } from './utils/gtm.js';
 
 export function App() {
   // Custom hooks
@@ -103,6 +104,8 @@ export function App() {
           },
         }));
       }
+      trackEvent('Event_lookup');
+      trackEvent('Event_lookup_button_click');
     } catch (err) {
       console.error('Lỗi tra cứu:', err);
       setResultData({

@@ -89,7 +89,7 @@ npm run build
 
 ```bash
 # Đồng bộ toàn bộ nội dung thư mục dist/ vào /var/www/sapnhap/
-sudo cp -r /opt/sapnhap/frontend/dist/* /var/www/sapnhap/
+sudo cp -r /tmp/dist/* /var/www/sapnhap/
 sudo chown -R nginx:nginx /var/www/sapnhap
 ```
 

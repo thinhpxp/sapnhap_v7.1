@@ -7,6 +7,7 @@ import { ZaloChatButton } from '../ui/ZaloChatButton.jsx';
 import { PromoBanner } from '../ui/PromoBanner.jsx';
 import { Modal } from '../ui/Modal.jsx';
 import { fetchAdminCenters, fetchGaStats } from '../../services/api.js';
+import { trackEvent } from '../../utils/gtm.js';
 
 // Helper chuẩn hóa dữ liệu Trung tâm hành chính (xử lý an toàn cho cả Array và Object)
 function normalizeAdminCenters(data) {
@@ -102,6 +103,7 @@ export function RightPanel({ resultData, isLookingUp, t }) {
 
   // Xử lý mở Modal xem địa chỉ Trung tâm hành chính
   const handleShowAdminCenters = async (wardCode, provinceCode) => {
+    trackEvent('Event_view_admincenter');
     setIsModalOpen(true);
     setLoadingAdminCenter(true);
     setAdminCenterData(null);

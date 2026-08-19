@@ -39,3 +39,5 @@ pnpm-debug.log*
 /dist/
 /build/
 /out/
+
+sync_config.jsonc

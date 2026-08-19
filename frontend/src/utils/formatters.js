@@ -32,10 +32,11 @@ export function normalizeLookupResponse({ type, queryLabel, apiData, fallbackCod
       village_changes: apiData.village_changes || [],
     };
   } else {
-    const events = Array.isArray(apiData) ? apiData : (apiData.events || []);
-    const villageChanges = Array.isArray(apiData)
-      ? apiData.flatMap(e => e.village_changes || [])
-      : (apiData.village_changes || []);
+    const rawEvents = Array.isArray(apiData) ? apiData : (apiData.events || []);
+    const events = rawEvents.map(e => ({
+      ...e,
+      village_changes: e.village_changes || [],
+    }));
     const firstEv = events[0];
 
     return {
@@ -44,7 +45,7 @@ export function normalizeLookupResponse({ type, queryLabel, apiData, fallbackCod
       new_ward_code: fallbackCodes.new_ward_code || firstEv?.new_ward_code,
       new_province_code: fallbackCodes.new_province_code || firstEv?.new_province_code,
       events,
-      village_changes: villageChanges,
+      village_changes: Array.isArray(apiData) ? [] : (apiData.village_changes || []),
     };
   }
 }

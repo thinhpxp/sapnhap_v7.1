@@ -86,6 +86,7 @@ export function LeftPanel({
         {/* Nút Tra Cứu: cố định ngay dưới form, không bị trôi theo chiều cao panel */}
         {mode !== 'quick' && (
           <button
+            id="lookup-btn"
             type="button"
             onClick={onLookup}
             disabled={isLookupDisabled || isLookingUp}

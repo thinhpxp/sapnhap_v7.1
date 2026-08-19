@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { fetchQuickSearch } from '../../services/api.js';
+import { trackEvent } from '../../utils/gtm.js';
 
 export function QuickSearchForm({ onSelectResult, t }) {
   const [searchType, setSearchType] = useState('old'); // 'old' | 'new'
@@ -42,6 +43,12 @@ export function QuickSearchForm({ onSelectResult, t }) {
     const name = item.name || item.old_ward_name || item.new_ward_name || '';
     const context = item.context || `${item.old_district_name ? item.old_district_name + ', ' : ''}${item.old_province_name || item.new_province_name || ''}`;
     const label = context ? `${name}, ${context}` : name;
+
+    if (searchType === 'old') {
+      trackEvent('Event_Quick_Search_Old');
+    } else {
+      trackEvent('Event_Quick_Search_New');
+    }
 
     onSelectResult({
       type: searchType === 'old' ? 'forward' : 'reverse',
@@ -84,6 +91,7 @@ export function QuickSearchForm({ onSelectResult, t }) {
         <div className="flex items-center border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-panel)] focus-within:border-[var(--color-border-focus)] focus-within:ring-2 focus-within:ring-[var(--color-border-focus)]/20 transition-all">
           <Search size={16} className="ml-3 text-[var(--color-text-muted)]" />
           <input
+            id={searchType === 'old' ? 'quick-search-old-input' : 'quick-search-new-input'}
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

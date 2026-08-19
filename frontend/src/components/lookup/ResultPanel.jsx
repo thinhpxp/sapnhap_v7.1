@@ -166,6 +166,7 @@ export function ResultPanel({ resultData, onShowAdminCenters, t }) {
         {/* Nút mở Modal địa chỉ TTHC nếu có sáp nhập */}
         {!isNoChange && events.length > 0 && onShowAdminCenters && (
           <button
+            id="show-admin-centers-btn"
             type="button"
             onClick={() => onShowAdminCenters(firstEv.new_ward_code, firstEv.new_province_code)}
             className="btn-secondary w-full justify-center"
@@ -209,6 +210,10 @@ export function ResultPanel({ resultData, onShowAdminCenters, t }) {
                   </div>
                   <SplitDescriptionBadge text={u.split_description} />
                   <UnitCodeDisplay label="Mã xã/huyện/tỉnh cũ" codes={[u.old_ward_code, u.old_district_code, u.old_province_code]} />
+                  <VillageChangesTable
+                    villageChanges={u.village_changes}
+                    title={`Thay đổi tại ${u.old_ward_name}:`}
+                  />
                 </li>
               ))}
             </ul>
@@ -218,6 +223,7 @@ export function ResultPanel({ resultData, onShowAdminCenters, t }) {
         {/* Nút xem TTHC */}
         {oldUnits.length > 0 && onShowAdminCenters && (
           <button
+            id="show-admin-centers-btn"
             type="button"
             onClick={() => onShowAdminCenters(oldUnits[0].new_ward_code, oldUnits[0].new_province_code)}
             className="btn-secondary w-full justify-center"
@@ -225,9 +231,6 @@ export function ResultPanel({ resultData, onShowAdminCenters, t }) {
             {t('showAdminCentersBtn', 'Xem địa chỉ Trung tâm Hành chính')}
           </button>
         )}
-
-        {/* Bảng thôn/xóm */}
-        <VillageChangesTable villageChanges={village_changes} title={t('villageChangesTitle')} />
       </div>
     );
   }
