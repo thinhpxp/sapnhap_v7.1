@@ -82,13 +82,15 @@ export function SearchableCombobox({
           )}
         </div>
 
-        {/* Danh sách lựa chọn */}
+        {/* Danh sách lựa chọn giải phóng khỏi container cha */}
         <ComboboxOptions
+          anchor={{ to: 'bottom start', gap: 4 }}
           className={clsx(
-            'absolute z-50 w-full mt-1 max-h-60 overflow-y-auto',
+            'z-50 w-[var(--input-width,100%)] min-w-[var(--input-width,100%)] max-h-60 overflow-y-auto',
             'bg-[var(--color-bg-panel)] border border-[var(--color-border)] rounded-lg',
             'shadow-[var(--shadow-dropdown)] outline-none',
-            'text-sm'
+            'text-sm',
+            'transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0'
           )}
         >
           {filtered.length === 0 ? (

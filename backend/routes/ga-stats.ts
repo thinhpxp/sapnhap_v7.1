@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { getCached, setCached } from '../cache.js';
+import { encryptPayload } from '../utils/cipher.js';
 
 const propertyId = process.env.GA4_PROPERTY_ID;
 
@@ -107,12 +108,12 @@ export async function gaStatsRoute(fastify: FastifyInstance) {
       const cached = await getCached<any>(cacheKey);
       if (cached) {
         reply.header('X-Cache', 'HIT');
-        return reply.send(cached);
+        return reply.send(encryptPayload(cached));
       }
 
       const analyticsClient = getAnalyticsClient();
       if (!analyticsClient || !propertyId) {
-        return reply.status(503).send({ error: 'Google Analytics credentials not configured' });
+        return reply.status(503).send(encryptPayload({ error: 'Google Analytics credentials not configured' }));
       }
 
       try {
@@ -125,10 +126,10 @@ export async function gaStatsRoute(fastify: FastifyInstance) {
 
         await setCached(cacheKey, resultData, ttl);
         reply.header('X-Cache', 'MISS');
-        return reply.send(resultData);
+        return reply.send(encryptPayload(resultData));
       } catch (error: any) {
         request.log.error(error);
-        return reply.status(500).send({ error: error.message || 'Lỗi máy chủ nội bộ.' });
+        return reply.status(500).send(encryptPayload({ error: error.message || 'Lỗi máy chủ nội bộ.' }));
       }
     }
   );

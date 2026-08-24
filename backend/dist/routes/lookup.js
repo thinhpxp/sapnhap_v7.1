@@ -1,7 +1,5 @@
 import { queryWithCircuitBreaker } from '../db.js';
 import { getCached, setCached } from '../cache.js';
-import { encryptPayload } from '../utils/cipher.js';
-
 export async function lookupRoute(fastify) {
     fastify.get('/api/lookup', {
         config: {
@@ -13,21 +11,21 @@ export async function lookupRoute(fastify) {
     }, async (request, reply) => {
         const { code, type } = request.query;
         if (!code) {
-            return reply.status(400).send(encryptPayload({ error: 'Thiếu tham số code.' }));
+            return reply.status(400).send({ error: 'Thiếu tham số code.' });
         }
         if (type !== 'forward' && type !== 'reverse') {
-            return reply.status(400).send(encryptPayload({ error: "Tham số 'type' phải là 'forward' hoặc 'reverse'." }));
+            return reply.status(400).send({ error: "Tham số 'type' phải là 'forward' hoặc 'reverse'." });
         }
         const wardCode = parseInt(code, 10);
         if (isNaN(wardCode)) {
-            return reply.status(400).send(encryptPayload({ error: 'Tham số code không hợp lệ.' }));
+            return reply.status(400).send({ error: 'Tham số code không hợp lệ.' });
         }
         const cacheKey = `sapnhap:lookup:${type}:${wardCode}`;
         const cached = await getCached(cacheKey);
         if (cached) {
             reply.header('X-Cache', 'HIT');
             reply.header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-            return reply.send(encryptPayload(cached));
+            return reply.send(cached);
         }
         try {
             if (type === 'forward') {
@@ -40,7 +38,7 @@ export async function lookupRoute(fastify) {
                 await setCached(cacheKey, result, 86400); // Cache 24h
                 reply.header('X-Cache', 'MISS');
                 reply.header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-                return reply.send(encryptPayload(result));
+                return reply.send(result);
             }
             else {
                 // Reverse lookup: list events by new_ward_code and attach village_changes
@@ -56,15 +54,15 @@ export async function lookupRoute(fastify) {
                 await setCached(cacheKey, result, 86400); // Cache 24h
                 reply.header('X-Cache', 'MISS');
                 reply.header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-                return reply.send(encryptPayload(result));
+                return reply.send(result);
             }
         }
         catch (error) {
             request.log.error(error);
-            return reply.status(500).send(encryptPayload({
+            return reply.status(500).send({
                 error: 'Lỗi máy chủ.',
                 details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-            }));
+            });
         }
     });
 }
