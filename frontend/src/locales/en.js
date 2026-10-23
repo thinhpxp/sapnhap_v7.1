@@ -82,6 +82,9 @@ export const en = {
   // Analytics
   realtimeTotalUsers: 'users online',
   realtimeTotalLookups: 'total lookups',
+  realtimeByLocation: 'Active users by location',
+  realtimeActiveNow: 'Active now',
+  noLocationData: 'Updating location details...',
 
   // Footer
   footerHome: 'Home',

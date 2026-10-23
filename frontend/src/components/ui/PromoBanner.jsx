@@ -7,9 +7,9 @@ export function PromoBanner({ items }) {
     {
       id: 'portfolio',
       title: 'Portfolio Phước Thịnh',
-      url: 'https://thinhpxp.io.vn',
+      url: 'https://thinhpxp.io.vn/portfolio/',
       icon: Globe,
-      description: 'thinhpxp.io.vn'
+      description: 'thinhpxp.io.vn/portfolio'
     },
     {
       id: 'drafting',

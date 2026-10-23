@@ -83,6 +83,9 @@ export const vi = {
   // Analytics
   realtimeTotalUsers: 'người đang online',
   realtimeTotalLookups: 'lượt tra cứu',
+  realtimeByLocation: 'Khu vực đang truy cập',
+  realtimeActiveNow: 'Đang trực tuyến',
+  noLocationData: 'Đang cập nhật vị trí...',
 
   // Footer
   footerHome: 'Trang chủ',

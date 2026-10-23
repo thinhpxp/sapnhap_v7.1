@@ -1,7 +1,7 @@
 // components/layout/RightPanel.jsx
 // Panel Phải: Chứa Kết quả tra cứu, Thống kê Analytics Realtime, Nút địa chỉ TTHC & Nút Chat Zalo
-import { useState, useEffect } from 'react';
-import { Compass, Users, MousePointerClick } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Compass, Users, MousePointerClick, MapPin } from 'lucide-react';
 import { ResultPanel } from '../lookup/ResultPanel.jsx';
 import { ZaloChatButton } from '../ui/ZaloChatButton.jsx';
 import { PromoBanner } from '../ui/PromoBanner.jsx';
@@ -48,11 +48,18 @@ export function RightPanel({ resultData, isLookingUp, t }) {
   // State cho Thống kê Analytics
   // totalActiveUsers: số người đang online (realtime)
   // totalClicks: tổng lượt tra cứu từ 01/07/2025 đến nay (events)
+  // activeLocations: danh sách chi tiết các thành phố đang có người truy cập
   const [analyticsData, setAnalyticsData] = useState({
     totalActiveUsers: null,
     totalClicks: null,
+    activeLocations: [],
     loaded: false,
   });
+
+  // State quản lý hiển thị Tooltip vị trí người dùng online
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const badgeRef = useRef(null);
+  const tooltipRef = useRef(null);
 
   // Nạp thống kê khi component mount (gộp cả realtime và events trong 1 request duy nhất)
   // Sau đó chỉ định kỳ cập nhật realtime mỗi 2 phút
@@ -66,6 +73,7 @@ export function RightPanel({ resultData, isLookingUp, t }) {
           setAnalyticsData({
             totalActiveUsers: data.totalActiveUsers ?? null,
             totalClicks: data.totalClicks ?? null,
+            activeLocations: Array.isArray(data.activeLocations) ? data.activeLocations : [],
             loaded: true,
           });
         }
@@ -81,6 +89,7 @@ export function RightPanel({ resultData, isLookingUp, t }) {
           setAnalyticsData(prev => ({
             ...prev,
             totalActiveUsers: data.totalActiveUsers ?? null,
+            activeLocations: Array.isArray(data.activeLocations) ? data.activeLocations : prev.activeLocations,
           }));
         }
       } catch {
@@ -97,6 +106,36 @@ export function RightPanel({ resultData, isLookingUp, t }) {
       clearInterval(realtimeInterval);
     };
   }, []);
+
+  // Đóng tooltip khi click ra ngoài hoặc bấm phím Escape
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        badgeRef.current &&
+        !badgeRef.current.contains(event.target) &&
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target)
+      ) {
+        setIsTooltipOpen(false);
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsTooltipOpen(false);
+      }
+    }
+
+    if (isTooltipOpen) {
+      document.addEventListener('pointerdown', handleClickOutside);
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isTooltipOpen]);
 
   // Xử lý mở Modal xem địa chỉ Trung tâm hành chính
   const handleShowAdminCenters = async (wardCode, provinceCode) => {
@@ -131,18 +170,97 @@ export function RightPanel({ resultData, isLookingUp, t }) {
 
           {/* Thanh Thống kê Analytics Realtime */}
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Số người đang online */}
-            <div className="analytics-badge">
-              <Users size={13} className="text-[var(--color-success)]" />
-              {analyticsData.loaded ? (
-                <>
-                  <span className="font-semibold text-[var(--color-text-primary)]">
-                    {analyticsData.totalActiveUsers ?? '—'}
-                  </span>
-                  <span>{t('realtimeTotalUsers', 'người đang online')}</span>
-                </>
-              ) : (
-                <span className="text-[var(--color-text-muted)] italic text-xs">Đang tải...</span>
+            {/* Số người đang online (Có Tooltip chi tiết theo thành phố khi hover hoặc click) */}
+            <div className="relative inline-block" ref={badgeRef}>
+              <div
+                role="button"
+                tabIndex={0}
+                aria-haspopup="dialog"
+                aria-expanded={isTooltipOpen}
+                aria-label="Xem chi tiết người dùng online theo khu vực"
+                onMouseEnter={() => setIsTooltipOpen(true)}
+                onMouseLeave={() => setIsTooltipOpen(false)}
+                onClick={() => setIsTooltipOpen(prev => !prev)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setIsTooltipOpen(prev => !prev);
+                  }
+                }}
+                className="analytics-badge cursor-pointer hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-light)] transition-all select-none"
+              >
+                <Users size={13} className="text-[var(--color-success)]" />
+                {analyticsData.loaded ? (
+                  <>
+                    <span className="font-semibold text-[var(--color-text-primary)]">
+                      {analyticsData.totalActiveUsers ?? '—'}
+                    </span>
+                    <span>{t('realtimeTotalUsers', 'người đang online')}</span>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse ml-0.5" />
+                  </>
+                ) : (
+                  <span className="text-[var(--color-text-muted)] italic text-xs">Đang tải...</span>
+                )}
+              </div>
+
+              {/* Tooltip hiển thị chi tiết tỉnh/thành phố */}
+              {isTooltipOpen && analyticsData.loaded && (
+                <div
+                  ref={tooltipRef}
+                  role="tooltip"
+                  onMouseEnter={() => setIsTooltipOpen(true)}
+                  onMouseLeave={() => setIsTooltipOpen(false)}
+                  className="absolute top-full left-0 mt-2 z-50 w-64 sm:w-72 p-3 bg-[var(--color-bg-panel)] border border-[var(--color-border)] rounded-xl shadow-[var(--shadow-dropdown)] text-xs text-[var(--color-text-primary)] transition-all animate-fadeIn"
+                  style={{
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {/* Mũi tên tooltip */}
+                  <div className="absolute -top-1.5 left-5 w-3 h-3 bg-[var(--color-bg-panel)] border-t border-l border-[var(--color-border)] transform rotate-45" />
+
+                  {/* Header tooltip */}
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--color-border)]">
+                    <div className="flex items-center gap-1.5 font-bold text-[var(--color-accent)]">
+                      <MapPin size={13} />
+                      <span>{t('realtimeByLocation', 'Khu vực đang truy cập')}</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--color-text-muted)] font-medium">Realtime (30m)</span>
+                  </div>
+
+                  {/* Danh sách thành phố & số người */}
+                  {analyticsData.activeLocations && analyticsData.activeLocations.length > 0 ? (
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      {analyticsData.activeLocations.map((loc, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-[var(--color-bg)] transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] flex-shrink-0" />
+                            <span className="font-medium truncate text-[var(--color-text-primary)]" title={loc.city}>
+                              {loc.city}
+                            </span>
+                          </div>
+                          <span className="font-semibold text-[var(--color-accent)] bg-[var(--color-accent-light)] px-1.5 py-0.5 rounded text-[11px] flex-shrink-0 ml-2">
+                            {loc.count} {loc.count > 1 ? t('usersPlural', 'người') : t('userSingular', 'người')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-2 text-center text-[var(--color-text-muted)] italic">
+                      {t('noLocationData', 'Đang cập nhật vị trí...')}
+                    </div>
+                  )}
+
+                  {/* Footer tóm tắt */}
+                  <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
+                    <span>{t('totalUsersOnline', 'Tổng trực tuyến')}:</span>
+                    <span className="font-bold text-[var(--color-success)]">
+                      {analyticsData.totalActiveUsers || 0} {t('usersPlural', 'người')}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
 
