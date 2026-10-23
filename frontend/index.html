@@ -1,21 +1,30 @@
 <!doctype html>
 <html lang="vi">
   <head>
-    <!-- Google Tag Manager -->
+    <!-- Google Tag Manager (Tối ưu trì hoãn để trang tải siêu tốc) -->
     <script>
-      (function (w, d, s, l, i) {
-        w[l] = w[l] || [];
-        w[l].push({
+      window.dataLayer = window.dataLayer || [];
+      function initGTM() {
+        if (window._gtmInitialized) return;
+        window._gtmInitialized = true;
+        window.dataLayer.push({
           'gtm.start': new Date().getTime(),
           event: 'gtm.js'
         });
-        var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s),
-          dl = l != 'dataLayer' ? '&l=' + l : '';
+        var f = document.getElementsByTagName('script')[0],
+          j = document.createElement('script');
         j.async = true;
-        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WFV4ML8F';
         f.parentNode.insertBefore(j, f);
-      })(window, document, 'script', 'dataLayer', 'GTM-WFV4ML8F');
+      }
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(function () { setTimeout(initGTM, 800); });
+      } else {
+        window.addEventListener('load', function () { setTimeout(initGTM, 800); });
+      }
+      window.addEventListener('scroll', initGTM, { once: true, passive: true });
+      window.addEventListener('click', initGTM, { once: true, passive: true });
+      window.addEventListener('touchstart', initGTM, { once: true, passive: true });
     </script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8" />

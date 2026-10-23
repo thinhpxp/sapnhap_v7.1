@@ -59,6 +59,6 @@ export async function fetchQuickSearch(term, type) {
 }
 
 // Lấy thống kê Google Analytics
-export async function fetchGaStats(report = 'events') {
+export async function fetchGaStats(report = 'all') {
   return fetchJson(`/api/ga-stats?report=${report}`);
 }

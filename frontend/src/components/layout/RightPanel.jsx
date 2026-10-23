@@ -54,47 +54,44 @@ export function RightPanel({ resultData, isLookingUp, t }) {
     loaded: false,
   });
 
-  // Nạp cả 2 loại thống kê khi component mount
-  // realtime: cập nhật mỗi 2 phút | events: cập nhật mỗi 15 phút (cache phía backend)
+  // Nạp thống kê khi component mount (gộp cả realtime và events trong 1 request duy nhất)
+  // Sau đó chỉ định kỳ cập nhật realtime mỗi 2 phút
   useEffect(() => {
     let isMounted = true;
 
-    async function loadRealtimeStats() {
+    async function loadInitialStats() {
       try {
-        const data = await fetchGaStats('realtime');
+        const data = await fetchGaStats('all');
         if (isMounted && data) {
-          setAnalyticsData(prev => ({
-            ...prev,
-            // Backend trả về field: totalActiveUsers
+          setAnalyticsData({
             totalActiveUsers: data.totalActiveUsers ?? null,
+            totalClicks: data.totalClicks ?? null,
             loaded: true,
-          }));
+          });
         }
       } catch {
         if (isMounted) setAnalyticsData(prev => ({ ...prev, loaded: true }));
       }
     }
 
-    async function loadEventStats() {
+    async function refreshRealtimeStats() {
       try {
-        const data = await fetchGaStats('events');
+        const data = await fetchGaStats('realtime');
         if (isMounted && data) {
           setAnalyticsData(prev => ({
             ...prev,
-            // Backend trả về field: totalClicks (tổng lượt tra cứu)
-            totalClicks: data.totalClicks ?? null,
+            totalActiveUsers: data.totalActiveUsers ?? null,
           }));
         }
       } catch {
-        // Bỏ qua im lặng nếu lỗi
+        // Bỏ qua nếu lỗi mạng định kỳ
       }
     }
 
-    loadRealtimeStats();
-    loadEventStats();
+    loadInitialStats();
 
     // Cập nhật realtime mỗi 2 phút
-    const realtimeInterval = setInterval(loadRealtimeStats, 120000);
+    const realtimeInterval = setInterval(refreshRealtimeStats, 120000);
     return () => {
       isMounted = false;
       clearInterval(realtimeInterval);
