@@ -66,18 +66,35 @@ async function fetchRealtimeFromGA(client) {
             // Tính tổng tất cả active users từ GA4
             totalActiveUsers += userCount;
             if (userCount > 0) {
-                const displayCity = (city && city !== '(not set)') ? city : (country && country !== '(not set)' ? country : 'Khác');
+                const hasCity = Boolean(city && city !== '(not set)');
+                const displayCity = hasCity
+                    ? city
+                    : (country && country !== '(not set)'
+                        ? (country === 'Vietnam' ? 'Việt Nam (Khu vực khác)' : `${country} (Khu vực khác)`)
+                        : 'Khu vực khác');
                 const existing = locationMap.get(displayCity);
                 if (existing) {
                     existing.count += userCount;
                 }
                 else {
-                    locationMap.set(displayCity, { city: displayCity, country: country || '', count: userCount });
+                    locationMap.set(displayCity, {
+                        city: displayCity,
+                        country: country || '',
+                        count: userCount,
+                        isGeneral: !hasCity,
+                    });
                 }
             }
         });
     }
-    const locations = Array.from(locationMap.values()).sort((a, b) => b.count - a.count);
+    // Sắp xếp: Các thành phố cụ thể xếp ở trên (count giảm dần), các dòng chung (Khu vực khác) xếp ở dưới cùng
+    const locations = Array.from(locationMap.values()).sort((a, b) => {
+        if (a.isGeneral && !b.isGeneral)
+            return 1;
+        if (!a.isGeneral && b.isGeneral)
+            return -1;
+        return b.count - a.count;
+    });
     return { totalActiveUsers, activeLocations: locations };
 }
 export async function gaStatsRoute(fastify) {

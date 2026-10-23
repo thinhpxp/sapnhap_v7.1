@@ -85,6 +85,7 @@ export const vi = {
   realtimeTotalLookups: 'lượt tra cứu',
   realtimeByLocation: 'Khu vực đang truy cập',
   realtimeActiveNow: 'Đang trực tuyến',
+  otherRegionsVN: 'Việt Nam (Khu vực khác)',
   noLocationData: 'Đang cập nhật vị trí...',
 
   // Footer

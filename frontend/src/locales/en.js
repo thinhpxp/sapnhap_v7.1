@@ -84,6 +84,7 @@ export const en = {
   realtimeTotalLookups: 'total lookups',
   realtimeByLocation: 'Active users by location',
   realtimeActiveNow: 'Active now',
+  otherRegionsVN: 'Vietnam (Other regions)',
   noLocationData: 'Updating location details...',
 
   // Footer

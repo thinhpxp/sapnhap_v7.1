@@ -229,37 +229,49 @@ export function RightPanel({ resultData, isLookingUp, t }) {
 
                   {/* Danh sách thành phố & số người */}
                   {analyticsData.activeLocations && analyticsData.activeLocations.length > 0 ? (
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {analyticsData.activeLocations.map((loc, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-[var(--color-bg)] transition-colors"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] flex-shrink-0" />
-                            <span className="font-medium truncate text-[var(--color-text-primary)]" title={loc.city}>
-                              {loc.city}
-                            </span>
-                          </div>
-                          <span className="font-semibold text-[var(--color-accent)] bg-[var(--color-accent-light)] px-1.5 py-0.5 rounded text-[11px] flex-shrink-0 ml-2">
-                            {loc.count} {loc.count > 1 ? t('usersPlural', 'người') : t('userSingular', 'người')}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                      {(analyticsData.activeLocations || [])
+                        .slice()
+                        .sort((a, b) => {
+                          const isAGeneral = Boolean(a.isGeneral || a.city === 'Vietnam' || a.city?.includes('Khu vực khác'));
+                          const isBGeneral = Boolean(b.isGeneral || b.city === 'Vietnam' || b.city?.includes('Khu vực khác'));
+                          if (isAGeneral && !isBGeneral) return 1;
+                          if (!isAGeneral && isBGeneral) return -1;
+                          return b.count - a.count;
+                        })
+                        .map((loc, idx) => {
+                          const isGeneral = Boolean(loc.isGeneral || loc.city === 'Vietnam' || loc.city?.includes('Khu vực khác'));
+                          const cityLabel = isGeneral ? t('otherRegionsVN', 'Việt Nam (Khu vực khác)') : loc.city;
+
+                          return (
+                            <div
+                              key={idx}
+                              className={`flex items-center justify-between py-1 px-2 rounded-md transition-colors ${
+                                isGeneral ? 'bg-[var(--color-bg)] opacity-90' : 'hover:bg-[var(--color-bg)]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                                    isGeneral ? 'bg-[var(--color-text-muted)]' : 'bg-[var(--color-success)]'
+                                  }`}
+                                />
+                                <span className="font-medium truncate text-[var(--color-text-primary)]" title={cityLabel}>
+                                  {cityLabel}
+                                </span>
+                              </div>
+                              <span className="font-semibold text-[var(--color-accent)] bg-[var(--color-accent-light)] px-1.5 py-0.5 rounded text-[11px] flex-shrink-0 ml-2">
+                                {loc.count} {loc.count > 1 ? t('usersPlural', 'người') : t('userSingular', 'người')}
+                              </span>
+                            </div>
+                          );
+                        })}
                     </div>
                   ) : (
                     <div className="py-2 text-center text-[var(--color-text-muted)] italic">
                       {t('noLocationData', 'Đang cập nhật vị trí...')}
                     </div>
                   )}
-
-                  {/* Footer tóm tắt */}
-                  <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
-                    <span>{t('totalUsersOnline', 'Tổng trực tuyến')}:</span>
-                    <span className="font-bold text-[var(--color-success)]">
-                      {analyticsData.totalActiveUsers || 0} {t('usersPlural', 'người')}
-                    </span>
-                  </div>
                 </div>
               )}
             </div>
