@@ -1,13 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { getCached, setCached } from '../cache.js';
-import { encryptPayload } from '../utils/cipher.js';
 
 const propertyId = process.env.GA4_PROPERTY_ID;
 
 const CACHE_TTL = {
   events: 900,    // 15 minutes
   realtime: 120,  // 2 minutes
+  all: 120,       // 2 minutes (bounded by realtime)
 };
 
 const CLICK_EVENTS_TO_SUM = [
@@ -84,7 +84,7 @@ async function fetchRealtimeFromGA(client: BetaAnalyticsDataClient) {
 }
 
 export async function gaStatsRoute(fastify: FastifyInstance) {
-  fastify.get<{ Querystring: { report?: 'events' | 'realtime' } }>(
+  fastify.get<{ Querystring: { report?: 'events' | 'realtime' | 'all' } }>(
     '/api/ga-stats',
     {
       config: {
@@ -95,28 +95,64 @@ export async function gaStatsRoute(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { report } = request.query;
+      const { report = 'all' } = request.query;
 
-      if (report !== 'events' && report !== 'realtime') {
+      if (report !== 'events' && report !== 'realtime' && report !== 'all') {
         return reply.status(400).send({ error: 'Invalid report type' });
-      }
-
-      const ttl = CACHE_TTL[report];
-      reply.header('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=60`);
-
-      const cacheKey = `ga_${report}`;
-      const cached = await getCached<any>(cacheKey);
-      if (cached) {
-        reply.header('X-Cache', 'HIT');
-        return reply.send(encryptPayload(cached));
       }
 
       const analyticsClient = getAnalyticsClient();
       if (!analyticsClient || !propertyId) {
-        return reply.status(503).send(encryptPayload({ error: 'Google Analytics credentials not configured' }));
+        return reply.status(503).send({ error: 'Google Analytics credentials not configured' });
       }
 
       try {
+        if (report === 'all') {
+          reply.header('Cache-Control', `public, s-maxage=${CACHE_TTL.all}, stale-while-revalidate=60`);
+
+          const cacheKeyAll = 'ga_all';
+          const cachedAll = await getCached<any>(cacheKeyAll);
+          if (cachedAll) {
+            reply.header('X-Cache', 'HIT');
+            return reply.send(cachedAll);
+          }
+
+          // 1. Get or fetch Events (15m TTL)
+          const eventsKey = 'ga_events';
+          let eventsData = await getCached<any>(eventsKey);
+          if (!eventsData) {
+            eventsData = await fetchEventCountFromGA(analyticsClient);
+            await setCached(eventsKey, eventsData, CACHE_TTL.events);
+          }
+
+          // 2. Get or fetch Realtime (2m TTL)
+          const realtimeKey = 'ga_realtime';
+          let realtimeData = await getCached<any>(realtimeKey);
+          if (!realtimeData) {
+            realtimeData = await fetchRealtimeFromGA(analyticsClient);
+            await setCached(realtimeKey, realtimeData, CACHE_TTL.realtime);
+          }
+
+          const combinedData = {
+            ...eventsData,
+            ...realtimeData,
+          };
+
+          await setCached(cacheKeyAll, combinedData, CACHE_TTL.all);
+          reply.header('X-Cache', 'MISS');
+          return reply.send(combinedData);
+        }
+
+        const ttl = CACHE_TTL[report];
+        reply.header('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=60`);
+
+        const cacheKey = `ga_${report}`;
+        const cached = await getCached<any>(cacheKey);
+        if (cached) {
+          reply.header('X-Cache', 'HIT');
+          return reply.send(cached);
+        }
+
         let resultData = {};
         if (report === 'events') {
           resultData = await fetchEventCountFromGA(analyticsClient);
@@ -126,10 +162,10 @@ export async function gaStatsRoute(fastify: FastifyInstance) {
 
         await setCached(cacheKey, resultData, ttl);
         reply.header('X-Cache', 'MISS');
-        return reply.send(encryptPayload(resultData));
+        return reply.send(resultData);
       } catch (error: any) {
         request.log.error(error);
-        return reply.status(500).send(encryptPayload({ error: error.message || 'Lỗi máy chủ nội bộ.' }));
+        return reply.status(500).send({ error: error.message || 'Lỗi máy chủ nội bộ.' });
       }
     }
   );
