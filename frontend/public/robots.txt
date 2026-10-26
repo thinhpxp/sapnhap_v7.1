@@ -1,5 +1,24 @@
-# robots.txt cho ứng dụng Tra Cứu Sáp Nhập
+# robots.txt cho ứng dụng Tra Cứu Sáp Nhập sapnhap.org
 User-agent: *
+Allow: /
+
+# Cho phép các AI Search & Crawler thu thập nội dung công khai
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot
 Allow: /
 
 # Chặn crawl các file script, API và config nội bộ
@@ -9,5 +28,5 @@ Disallow: /package.json
 Disallow: /package-lock.json
 
 # Đường dẫn sitemap chính xác cho Google Search Console
-Sitemap: https://sapnhap.thinhpxp.io.vn/sitemap.xml
-Sitemap: https://sapnhap.thinhpxp.io.vn/blog-sitemap.xml
+Sitemap: https://sapnhap.org/sitemap.xml
+Sitemap: https://sapnhap.org/blog-sitemap.xml

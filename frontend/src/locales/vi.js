@@ -93,6 +93,7 @@ export const vi = {
   footerAbout: 'Giới thiệu',
   footerContact: 'Liên hệ',
   footerPolicies: 'Chính sách',
+  footerBlog: 'Blog tin tức',
   blogLinkText: 'Xem danh sách chi tiết 34 tỉnh thành phố mới.',
   footerCopyright: 'Phiên bản 8.1 © 2026. Dữ liệu sáp nhập đơn vị hành chính Việt Nam.',
 

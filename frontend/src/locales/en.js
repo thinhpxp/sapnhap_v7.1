@@ -92,6 +92,7 @@ export const en = {
   footerAbout: 'About',
   footerContact: 'Contact',
   footerPolicies: 'Policies',
+  footerBlog: 'Blog & News',
   blogLinkText: 'Read our blog for details on the 34 new provinces.',
   footerCopyright: 'Version 8.1 © 2026. Administrative unit merger database of Vietnam.',
 

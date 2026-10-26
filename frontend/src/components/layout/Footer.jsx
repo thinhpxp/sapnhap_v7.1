@@ -26,9 +26,9 @@ export function Footer({ t, lang = 'vi' }) {
             {t('footerPolicies', 'Chính sách')}
           </a>
           <span>•</span>
-          {/* Blog chỉ có phiên bản tiếng Việt, không phân ngôn ngữ */}
-          <a href="/blog/cac-tinh-thanh-pho-viet-nam" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-accent)] transition-colors no-underline">
-            {t('blogLinkText', 'Blog 34 tỉnh thành')}
+          {/* Link thẳng tới trang chủ Blog tin tức */}
+          <a href="/blog" className="hover:text-[var(--color-accent)] transition-colors no-underline">
+            {t('footerBlog', 'Blog tin tức')}
           </a>
         </div>
         <div className="text-[var(--color-text-muted)] text-[11px]">
