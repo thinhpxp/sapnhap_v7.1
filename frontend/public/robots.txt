@@ -2,7 +2,7 @@
 User-agent: *
 Allow: /
 
-# Cho phép các AI Search & Crawler thu thập nội dung công khai
+# Cho phép các công cụ tìm kiếm truyền thống & AI Search (GEO)
 User-agent: Googlebot
 Allow: /
 
@@ -21,12 +21,12 @@ Allow: /
 User-agent: Applebot
 Allow: /
 
-# Chặn crawl các file script, API và config nội bộ
+# Chặn cào các file cấu hình và API nội bộ
 Disallow: /api/*
 Disallow: /vercel.json
 Disallow: /package.json
 Disallow: /package-lock.json
 
-# Đường dẫn sitemap chính xác cho Google Search Console
+# Đường dẫn sitemap chính thức
 Sitemap: https://sapnhap.org/sitemap.xml
 Sitemap: https://sapnhap.org/blog-sitemap.xml
